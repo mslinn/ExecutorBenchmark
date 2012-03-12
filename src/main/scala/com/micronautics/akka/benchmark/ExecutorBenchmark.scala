@@ -63,5 +63,5 @@ object ExecutorBenchmark extends App {
   )
 
   ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
-  Benchmark(ecNameMap)(ExpensiveCalc.run)(true) run
+  Benchmark(ecNameMap)(ExpensiveCalc.run)(false) run
 }
