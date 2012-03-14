@@ -52,14 +52,14 @@ object ExecutorBenchmark extends App {
   private val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
 
   val ecNameMap = ListMap(
-    system1 -> "akka.actor.ActorSystem fork-join-executor",
-    system2 -> "akka.actor.ActorSystem thread-pool-executor with parallelism-factor = 3.0",
-    system3 -> "akka.actor.ActorSystem thread-pool-executor with parallelism-factor = 1.0",
-    esFJP -> "akka.jsr166y.ForkJoinPool",
-    esFTP1 -> "FixedThreadPool with nProcessors=1 (java.util.concurrent.ThreadPoolExecutor)",
-    esFTPn -> "FixedThreadPool with nProcessors=%d (java.util.concurrent.ThreadPoolExecutor)".format(nProcessors),
-    esCTP -> "CachedThreadPool (java.util.concurrent.ThreadPoolExecutor)",
-    esSTE -> "SingleThreadExecutor (java.util.concurrent.ThreadPoolExecutor)"
+    system1 -> "Akka ActorSystem w/ fork-join-executor",
+    system2 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=3",
+    system3 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
+    esFJP   -> "Updated ForkJoinPool",
+    esFTP1  -> "FixedThreadPool w/ nProcessors=1",
+    esFTPn  -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
+    esCTP   -> "CachedThreadPool",
+    esSTE   -> "SingleThreadExecutor"
   )
 
   ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
