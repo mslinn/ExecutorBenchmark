@@ -13,7 +13,7 @@ scalaVersion in update := "2.9.1"
 
 autoCompilerPlugins := true
 
-javaOptions in run += "-Xbatch -server -Xmx1G -Xms1G" 
+javaOptions in run += "-Xbatch -server -Xmx1G -Xms1G"
 
 resolvers ++= Seq(
   "Akka Snapshots"        at "http://akka.io/snapshots",
@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "org.scala-tools"               % "scala-stm_2.9.1"     % "0.5"     withSources(),
   "org.scala-tools.time"          % "time_2.9.1"          % "latest.release"       ,
   "org.scala-lang"                % "scala-swing"         % "2.9.1-1" withSources(),
-  "jfree"                         % "jfreechart"          % "1.0.2"
+  "jfree"                         % "jfreechart"          % "1.0.9"   withSources()
 )
 
 seq(assemblySettings: _*)
