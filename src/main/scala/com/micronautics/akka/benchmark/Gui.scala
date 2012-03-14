@@ -2,18 +2,22 @@ package com.micronautics.akka.benchmark
 
 import com.micronautics.util.PersistableApp
 import org.joda.time.DateTime
-import java.awt.{Dimension, Point}
 import java.io.File
 import java.util.Properties
 import swing._
 import event.{ButtonClicked, WindowOpened, WindowClosing}
-import javax.swing.WindowConstants
+import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.{ChartPanel, ChartFactory}
+import java.awt.{BorderLayout, Dimension, Point}
+import javax.swing.{JPanel, WindowConstants}
 
 /**
  * @author Mike Slinn */
 class Gui (benchmark: Benchmark) extends SimpleSwingApplication with PersistableApp {
   var running: Boolean = false
   private val navigator = new Navigator
+  private val attribution = new Label("Copyright Micronautics Research Corporation. All rights reserved.")
 
   /** Swing entry point */
   def top = new MainFrame {
@@ -27,6 +31,8 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
     contents = new BoxPanel(Orientation.Vertical) {
       contents += navigator
+      contents += attribution
+      peer.add(graphSets)
       border = Swing.EmptyBorder(30, 30, 10, 30)
       preferredSize = new Dimension(400, 400)
     }
@@ -59,14 +65,40 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     }
   }
 
-  def graphSet(key: Object, value: String) = new BoxPanel(Orientation.Vertical) {
-    border = Swing.EmptyBorder(30, 30, 10, 30)
-  }
-  
-  def graphSets = new BoxPanel(Orientation.Vertical) {
-    benchmark.ecNameMap.keys.foreach { k =>
-      contents += new graphSet(k, benchmark.ecNameMap.get(k))
+  def graphSet(key: Object, value: String): JPanel = {
+    val dataset = new DefaultCategoryDataset()
+    //benchmark.ecNameMap
+    dataset.addValue(1.0, "Row 1", "Column 1")
+    dataset.addValue(5.0, "Row 1", "Column 2")
+    dataset.addValue(3.0, "Row 1", "Column 3")
+    dataset.addValue(2.0, "Row 2", "Column 1")
+    dataset.addValue(3.0, "Row 2", "Column 2")
+    dataset.addValue(2.0, "Row 2", "Column 3")
+
+    val barChart = ChartFactory.createBarChart(
+      "Bar Chart Demo", // chart title
+      "Category", // domain axis label
+      "Value", // range axis label
+      dataset,
+      PlotOrientation.HORIZONTAL, // orientation
+      true, // include legend
+      true, // tooltips?
+      false // URLs?
+    )
+    val chartPanel = new ChartPanel(barChart, false) {
+      setPreferredSize(new Dimension(500, 270))
     }
+    val panel = new JPanel
+    panel.add(chartPanel)
+    panel
+  }
+
+  def graphSets = {
+    val panel = new JPanel
+    benchmark.ecNameMap.keys.foreach { k =>
+      panel.add(graphSet(k, benchmark.ecNameMap.get(k).get))
+    }
+    panel
   }
 
   private class Navigator extends BoxPanel(Orientation.Horizontal) {
@@ -74,12 +106,8 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     val buttonRunStop = new Button("Run")
     buttonRunStop.size = new Dimension(navItemHeight, navItemHeight)
 
-//    contents += buttonPrev
     contents += buttonRunStop
-
-//    listenTo(buttonPrev)
     listenTo(buttonRunStop)
-
     reactions += {
       case ButtonClicked(button) =>
         if (button==buttonRunStop) {
@@ -91,8 +119,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
             button.text = "Stop"
           }
         }
-//        else if (button==buttonNext)
-//          index = math.min(Pirates.length-1, index+1)
     }
   }
 }
