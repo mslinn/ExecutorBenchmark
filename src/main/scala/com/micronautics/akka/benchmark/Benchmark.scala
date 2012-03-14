@@ -9,12 +9,20 @@ import akka.actor.ActorSystem
 /** Does the heavy lifting for ExecutorBenchmark
  * @author Mike Slinn
  */
-class Benchmark (ecNameMap: Map[Object, String],
+class Benchmark (val ecNameMap: Map[Object, String],
                  var load: () => Any,
                  var showResult: Boolean
                 ) {
   val NumInterations = 1000
   implicit var dispatcher: ExecutionContext = null
+
+  /** Swing view */
+  def showGui {
+    val gui = new Gui(this)
+    gui.startup(null)
+  }
+
+  def stop() { /* not implemented */ }
 
   def run() {
     println()
