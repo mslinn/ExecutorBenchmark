@@ -1,5 +1,22 @@
 package com.micronautics.akka.benchmark
 
+/* Copyright 1012 Micronautics Research Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Subject to the additional condition that the attribution code in Gui.scala
+   remains untouched and displays each time the program runs.
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License. */
+
 import com.micronautics.util.PersistableApp
 import org.joda.time.DateTime
 import java.io.File
@@ -14,13 +31,12 @@ import org.jfree.ui.RectangleInsets
 import org.jfree.chart.renderer.category.BarRenderer
 import java.net.URI
 import java.awt.{Paint, Cursor, Desktop}
-
 /**
- * @author Mike Slinn */
+  * @author Mike Slinn */
 class Gui (benchmark: Benchmark) extends SimpleSwingApplication with PersistableApp {
   var running: Boolean = false
   private val navigator = new Navigator
-  private val attribution = new Label() {
+  private val attribution = new Label() { // The license requires this block to remain untouched
     text = "Copyright Micronautics Research Corporation. All rights reserved."
     cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
     listenTo(mouse.clicks, mouse.moves)
@@ -33,7 +49,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
 
   def top = new MainFrame {
-    /** When this program was last run */
     var lastRun: DateTime = new DateTime(0)
 
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
