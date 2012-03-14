@@ -13,7 +13,7 @@ import javax.swing.{JPanel, WindowConstants}
 import org.jfree.ui.RectangleInsets
 import org.jfree.chart.renderer.category.BarRenderer
 import java.net.URI
-import java.awt.{Cursor, Desktop}
+import java.awt.{Paint, Cursor, Desktop}
 
 /**
  * @author Mike Slinn */
@@ -38,17 +38,18 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
     title = "Executor Benchmark v0.1"
-    //location = new Point(200, 200)
-    //size = new Dimension(400, 400)
+    size = new Dimension(575, 900)
 
     contents = new BoxPanel(Orientation.Vertical) {
+      val graphs = graphSets
+      peer.setBackground(graphs.getBackground)
+
       contents += navigator
-      peer.add(graphSets)
+      peer.add(graphs)
       contents += new Label(" ")
       contents += new Label(" ")
       contents += attribution
       border = Swing.EmptyBorder(30, 30, 10, 30)
-      //preferredSize = new Dimension(400, 400)
     }
 
     reactions += {
@@ -61,10 +62,41 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
         sys.exit(0)
     }
 
+    def graphSets: JPanel = {
+      val dataset = new DefaultCategoryDataset()
+      var i = 100
+      benchmark.ecNameMap.keys.foreach { k =>
+        dataset.addValue(1234, benchmark.ecNameMap.get(k).get, "Warm-up")
+        dataset.addValue(1111, benchmark.ecNameMap.get(k).get, "Timed")
+        i = i + 100
+      }
+
+      val barChart = ChartFactory.createBarChart("", "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
+      barChart.getTitle.setFont(new Font("SanSerif", 0, 16))
+      barChart.setPadding(new RectangleInsets(20, 0, 0, 0))
+      barChart.setBackgroundPaint(new Color(0.8f, 0.8f, 0.8f))
+      barChart.getLegend.setMargin(20, 0, 0, 0)
+
+      val renderer = barChart.getCategoryPlot().getRenderer().asInstanceOf[BarRenderer]
+      renderer.setDrawBarOutline(false)
+      //renderer.setSeriesPaint(0, new Color(14, 107, 14));
+      //renderer.setSeriesPaint(1, new Color(42, 94, 130));
+      renderer.setMaximumBarWidth(1.0/(benchmark.ecNameMap.keys.size+1))
+
+      val chartPanel = new ChartPanel(barChart, false) {
+        setPreferredSize(new Dimension(500, 50*benchmark.ecNameMap.keys.size))
+        setBackground(barChart.getBackgroundPaint.asInstanceOf[Color])
+      }
+      val panel = new JPanel
+      panel.setBackground(chartPanel.getBackground)
+      panel.add(chartPanel)
+      panel
+    }
+
     private def loadProperties {
       val props = readProperties(new File("executorBenchmark.properties"))
       location = new Point(props.getOrElse("x", "0").toInt, props.getOrElse("y", "0").toInt)
-      size = new Dimension(props.getOrElse("width", "500").toInt, props.getOrElse("height", "600").toInt)
+      size = new Dimension(props.getOrElse("width", "575").toInt, props.getOrElse("height", "900").toInt)
       lastRun = new DateTime(props.getOrElse("lastRun", "0"))
     }
 
@@ -77,38 +109,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       props.setProperty("lastRun", new DateTime().toString)
       writeProperties(new File("executorBenchmark.properties"), props)
     }
-  }
-
-  def graphSet(key: Object, chartTitle: String): JPanel = {
-    val dataset = new DefaultCategoryDataset()
-    //benchmark.ecNameMap
-    dataset.addValue(1234, "Warm up", "")
-    dataset.addValue(1111, "Timing run", "")
-
-    val barChart = ChartFactory.createBarChart(chartTitle, "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
-    //barChart.getTitle.setFont(barChart.getTitle.getFont.deriveFont(1))
-    barChart.getTitle.setFont(new Font("SanSerif", 0, 16))
-    barChart.setPadding(new RectangleInsets(20, 0, 0, 0))
-
-    val renderer = barChart.getCategoryPlot().getRenderer().asInstanceOf[BarRenderer]
-    renderer.setDrawBarOutline(false)
-    renderer.setSeriesPaint(0, new Color(14, 107, 14));
-    renderer.setSeriesPaint(1, new Color(42, 94, 130));
-
-    val chartPanel = new ChartPanel(barChart, false) {
-      setPreferredSize(new Dimension(500, 150))
-    }
-    val panel = new JPanel
-    panel.add(chartPanel)
-    panel
-  }
-
-  def graphSets = {
-    val panel = new JPanel
-    benchmark.ecNameMap.keys.foreach { k =>
-      panel.add(graphSet(k, benchmark.ecNameMap.get(k).get))
-    }
-    panel
   }
 
   private class Navigator extends BoxPanel(Orientation.Horizontal) {
