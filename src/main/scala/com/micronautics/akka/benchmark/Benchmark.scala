@@ -49,25 +49,25 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       e: Any =>
         if (e.isInstanceOf[ActorSystem]) {
           dispatcher = e.asInstanceOf[ActorSystem].dispatcher
-          doit(ecNameMap.get(e.asInstanceOf[AnyRef]).get)
+          doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
           e.asInstanceOf[ActorSystem].shutdown()
         } else {
           dispatcher = ExecutionContext.fromExecutor(e.asInstanceOf[Executor])
-          doit(ecNameMap.get(e.asInstanceOf[AnyRef]).get)
+          doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
           e.asInstanceOf[ExecutorService].shutdown()
         }
     }
   }
 
-  def doit(executorName: String) {
+  def doit(test: Object, executorName: String) {
     if (consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    parallelTest
-    futureTest
+    addTest(test, executorName, parallelTest, true)
+    addTest(test, executorName, futureTest, true)
     if (consoleOutput)
       println("\nRunning tests on " + executorName)
-    parallelTest
-    futureTest
+    addTest(test, executorName, parallelTest, false)
+    addTest(test, executorName, futureTest, false)
     if (consoleOutput)
       println("\n---------------------------------------------------\n")
   }

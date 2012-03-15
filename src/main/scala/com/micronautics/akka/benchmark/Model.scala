@@ -22,8 +22,24 @@ import collection.mutable.ListMap
 /**
   * @author Mike Slinn */
 
-case class TimedResult[+T](millis: Long, result: T)
+case class TimedResult[T](millis: Long, result: T)
+
+case class TestResult(test: Object, testName: String, millis: Long, result: Any)
 
 object Model {
   val ecNameMap = new ListMap[Object, String]
+
+  /** Contains results that do not matter, executed just to warm up hotspot */
+  val testResultMapWarmup = new ListMap[Object,  TestResult]
+
+  /** Contains results that do matter, after hotspot is warmed up */
+  val testResultMapHot = new ListMap[Object,  TestResult]
+
+  addTest(test: Object, testName: String, timedResult: TimedResult, isWarmup: Boolean) {
+    val testResult = new TestResult(test, testName, timedResult)
+    if (isWarmup)
+      testResultMapWarmup += test -> testResult
+    else
+      testResultMapHot += test -> testResult
+  }
 }
