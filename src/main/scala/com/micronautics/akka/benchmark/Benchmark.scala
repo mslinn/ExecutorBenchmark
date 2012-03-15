@@ -29,14 +29,12 @@ import Model.ecNameMap
   * @author Mike Slinn
   */
 class Benchmark (var load: () => Any, var showResult: Boolean) {
+  val gui = new Gui(this)
   implicit var dispatcher: ExecutionContext = null
 
 
   /** Swing view */
-  def showGui {
-    val gui = new Gui(this)
-    gui.startup(null)
-  }
+  def showGui { gui.startup(null) }
 
   def stop() { /* not implemented */ }
 
@@ -60,12 +58,12 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def doit(test: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    Model.addTest(test, executorName, parallelTest, true)
-    Model.addTest(test, executorName, futureTest, true)
+    gui.addValue(Model.addTest(test, executorName, parallelTest, true), true)
+    gui.addValue(Model.addTest(test, executorName, futureTest, true), true)
     if (Benchmark.consoleOutput)
       println("\nRunning tests on " + executorName)
-    Model.addTest(test, executorName, parallelTest, false)
-    Model.addTest(test, executorName, futureTest, false)
+    gui.addValue(Model.addTest(test, executorName, parallelTest, false), false)
+    gui.addValue(Model.addTest(test, executorName, futureTest, false), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -77,13 +75,13 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     }("Futures creation time").asInstanceOf[TimedResult[Seq[Future[Any]]]]
 
     val f2 = Future.sequence(trFuture.results).map { results: Seq[Any] =>
-        val t1: Long = System.nanoTime()
+        val elapsedMs: Long = (System.nanoTime() - t0) / 1000000
         if (Benchmark.consoleOutput) {
-          println("Total time for Akka future version: " + (t1 - t0) / 1000000 + "ms")
+          println("Total time for Akka future version: " + elapsedMs + "ms")
           if (showResult)
             println("Result in " + trFuture.millis + " using Akka future version: " + results)
         }
-        TimedResult(trFuture.millis, results)
+        TimedResult(elapsedMs, results)
     }
     val r = Await.result(f2, Duration.Inf)
     r.asInstanceOf[TimedResult[Seq[Any]]]
@@ -94,17 +92,17 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       ((1 to Benchmark.numInterations).par.map { x => load() })
     }("Parallel collection elapsed time").asInstanceOf[TimedResult[Seq[Any]]]
     if (Benchmark.consoleOutput && showResult)
-      println("Result using Scala parallel collections: " + timedResult.results)
+      println("Result in " + timedResult.millis + " using Scala parallel collections: " + timedResult.results)
     timedResult
   }
 
   def time(block: => Any)(msg: String="Elapsed time"): TimedResult[Any] = {
     val t0 = System.nanoTime()
     val result: Any = block
-    val t1 = System.nanoTime()
+    val elapsedMs = (System.nanoTime() - t0)/1000000
     if (Benchmark.consoleOutput)
-      println(msg + ": "+ (t1 - t0)/1000000 + "ms")
-    TimedResult((t1 - t0)/1000000, result)
+      println(msg + ": "+ elapsedMs + "ms")
+    TimedResult(elapsedMs, result)
   }
 }
 

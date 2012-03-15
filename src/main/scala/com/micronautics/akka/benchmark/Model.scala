@@ -1,6 +1,7 @@
 package com.micronautics.akka.benchmark
 
-import collection.mutable.ListMap
+import scala.collection.mutable.{LinkedHashMap}
+
 
 /* Copyright 1012 Micronautics Research Corporation
 
@@ -27,19 +28,20 @@ case class TimedResult[T](millis: Long, results: T)
 case class TestResult(test: Any, testName: String, millis: Long, result: Any)
 
 object Model {
-  val ecNameMap = new ListMap[Object, String]
+  val ecNameMap = new LinkedHashMap[Object, String]
 
   /** Contains results that do not matter, executed just to warm up hotspot */
-  val testResultMapWarmup = new ListMap[Any,  TestResult]
+  val testResultMapWarmup = new LinkedHashMap[Any,  TestResult]
 
   /** Contains results that do matter, after hotspot is warmed up */
-  val testResultMapHot = new ListMap[Any,  TestResult]
+  val testResultMapHot = new LinkedHashMap[Any,  TestResult]
 
-  def addTest(test: Any, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean) {
+  def addTest(test: Any, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean): TestResult = {
     val testResult = new TestResult(test, testName, timedResult.millis, timedResult.results)
     if (isWarmup)
       testResultMapWarmup += test -> testResult
     else
       testResultMapHot += test -> testResult
+    testResult
   }
 }

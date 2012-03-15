@@ -69,13 +69,13 @@ object ExecutorBenchmark extends App {
 
   Model.ecNameMap ++= ListMap(
     system1 -> "Akka ActorSystem w/ fork-join-executor",
-    system2 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=3",
-    system3 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
-    esFJP   -> "Updated ForkJoinPool",
-    esFTP1  -> "FixedThreadPool w/ nProcessors=1",
-    esFTPn  -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
-    esCTP   -> "CachedThreadPool",
-    esSTE   -> "SingleThreadExecutor"
+    system2 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=3"
+    //system3 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
+    //esFJP   -> "Updated ForkJoinPool",
+    //esFTP1  -> "FixedThreadPool w/ nProcessors=1",
+    //esFTPn  -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
+    //esCTP   -> "CachedThreadPool",
+    //esSTE   -> "SingleThreadExecutor"
   )
 
   ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
