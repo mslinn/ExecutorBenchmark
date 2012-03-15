@@ -1,4 +1,6 @@
-package com.micronautics.akka
+package com.micronautics.akka.benchmark
+
+import collection.mutable.ListMap
 
 /* Copyright 1012 Micronautics Research Corporation
 
@@ -17,20 +19,11 @@ package com.micronautics.akka
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-/** Default load for ExecutorBenchmark
- * @author Mike Slinn
- * @author calculatePiFor() provided by Typesafe
- */
+/**
+  * @author Mike Slinn */
 
-class ExpensiveCalc {}
+case class TimedResult[+T](millis: Long, result: T)
 
-object ExpensiveCalc {
-  def run(): Any = { calculatePiFor(0, 1000000) }
-
-  def calculatePiFor(start: Int, nrOfElements: Int): Double = {
-    var acc = 0.0
-    for (i <- start until (start + nrOfElements))
-      acc += 4.0 * (1 - (i % 2) * 2) / (2 * i + 1)
-    acc
-  }
+object Model {
+  val ecNameMap = new ListMap[Object, String]
 }

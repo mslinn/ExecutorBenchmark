@@ -27,10 +27,12 @@ import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartPanel, ChartFactory}
 import javax.swing.{JPanel, WindowConstants}
-import org.jfree.ui.RectangleInsets
 import org.jfree.chart.renderer.category.BarRenderer
 import java.net.URI
 import java.awt.{Paint, Cursor, Desktop}
+import Model.ecNameMap
+import org.jfree.ui.{RectangleAnchor, HorizontalAlignment, RectangleEdge, RectangleInsets}
+
 /**
   * @author Mike Slinn */
 class Gui (benchmark: Benchmark) extends SimpleSwingApplication with PersistableApp {
@@ -80,9 +82,9 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     def graphSets: JPanel = {
       val dataset = new DefaultCategoryDataset()
       var i = 100
-      benchmark.ecNameMap.keys.foreach { k =>
-        dataset.addValue(1234, benchmark.ecNameMap.get(k).get, "Warm-up")
-        dataset.addValue(1111, benchmark.ecNameMap.get(k).get, "Timed")
+      ecNameMap.keys.foreach { k =>
+        dataset.addValue(1234, ecNameMap.get(k).get, "Warm-up")
+        dataset.addValue(1111, ecNameMap.get(k).get, "Timed")
         i = i + 100
       }
 
@@ -91,15 +93,16 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       barChart.setPadding(new RectangleInsets(20, 0, 0, 0))
       barChart.setBackgroundPaint(new Color(0.8f, 0.8f, 0.8f))
       barChart.getLegend.setMargin(20, 0, 0, 0)
+      barChart.setAntiAlias(true)
 
       val renderer = barChart.getCategoryPlot().getRenderer().asInstanceOf[BarRenderer]
       renderer.setDrawBarOutline(false)
       //renderer.setSeriesPaint(0, new Color(14, 107, 14));
       //renderer.setSeriesPaint(1, new Color(42, 94, 130));
-      renderer.setMaximumBarWidth(1.0/(benchmark.ecNameMap.keys.size+1))
+      renderer.setMaximumBarWidth(1.0/(ecNameMap.keys.size+1))
 
       val chartPanel = new ChartPanel(barChart, false) {
-        setPreferredSize(new Dimension(500, 50*benchmark.ecNameMap.keys.size))
+        setPreferredSize(new Dimension(500, 50 * ecNameMap.keys.size))
         setBackground(barChart.getBackgroundPaint.asInstanceOf[Color])
       }
       val panel = new JPanel

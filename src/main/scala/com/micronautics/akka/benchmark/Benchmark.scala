@@ -22,17 +22,21 @@ import akka.dispatch.{Await, ExecutionContext, Future}
 import java.util.concurrent.{ExecutorService, Executor}
 import scala.collection.immutable.Map
 import akka.actor.ActorSystem
+import Model.ecNameMap
+import com.micronautics.akka.DefaultLoad
+import akka.util.Duration
 
 /**
   * Does the heavy lifting for ExecutorBenchmark
   * @author Mike Slinn
   */
-class Benchmark (val ecNameMap: Map[Object, String],
-                 var load: () => Any,
+class Benchmark (var load: () => Any,
                  var showResult: Boolean
                 ) {
-  val NumInterations = 1000
+  var consoleOutput: Boolean = true
+  val NumInterations: Int = 1000
   implicit var dispatcher: ExecutionContext = null
+
 
   /** Swing view */
   def showGui {
@@ -59,54 +63,67 @@ class Benchmark (val ecNameMap: Map[Object, String],
   }
 
   def doit(executorName: String) {
-    println("Warming up hotspot to test " + executorName)
+    if (consoleOutput)
+      println("Warming up hotspot to test " + executorName)
     parallelTest
-    Await.ready(futureTest, Inf)
-    println("\nRunning tests on " + executorName)
+    futureTest
+//    Await.ready(futureTest, Inf)
+    if (consoleOutput)
+      println("\nRunning tests on " + executorName)
     parallelTest
-    Await.ready(futureTest, Inf)
-    println("\n---------------------------------------------------\n")
+    futureTest
+//    Await.ready(futureTest, Inf)
+    if (consoleOutput)
+      println("\n---------------------------------------------------\n")
   }
 
-  def futureTest = {
+  def futureTest: Seq[Any] = {
     val t0 = System.nanoTime()
-    val futures = time {
+    val trFuture = time {
       for (i <- 1 to NumInterations) yield Future { load() }
-    }("Futures creation time")
+    }("Futures creation time").asInstanceOf[TimedResult[Seq[Future[Any]]]]
 
-    Future sequence futures andThen {
+    val f2 = Future sequence trFuture.result andThen {
       case f =>
         val t1 = System.nanoTime()
         println("Total time for Akka future version: " + (t1 - t0) / 1000000 + "ms")
         f match {
-          case Right(result) =>
+          case Right(timedResult: TimedResult[Any]) =>
             if (showResult)
-              println("Result using Akka future version: " + result)
+              println("Result using Akka future version: " + timedResult.result)
+            timedResult
           case Left(exception) =>
             println(exception.getMessage)
+            TimedResult(0, null)
+          case _ =>
+            TimedResult(0, null)
         }
     }
+    val x = Await.result(f2, Duration.Inf)
+    x.asInstanceOf[Seq[Any]]
   }
 
-  def parallelTest {
-    val parallelResult = time {
+  def parallelTest: TimedResult[Any] = {
+    val timedResult = time {
       (1 to NumInterations).par.map { x => load() }
     }("Parallel collection elapsed time")
     if (showResult)
-      println("Result using Scala parallel collections: " + parallelResult)
-    }
+      println("Result using Scala parallel collections: " + timedResult.result)
+    timedResult
+  }
 
-  def time[R](block: => R)(msg: String="Elapsed time"): R = {
-      val t0 = System.nanoTime()
-      val result = block
-      val t1 = System.nanoTime()
+  def time(block: => Any)(msg: String="Elapsed time"): TimedResult[Any] = {
+    val t0 = System.nanoTime()
+    val result: Any = block
+    val t1 = System.nanoTime()
+    if (consoleOutput)
       println(msg + ": "+ (t1 - t0)/1000000 + "ms")
-      result
+    TimedResult((t1 - t0)/1000000, result)
   }
 }
 
 object Benchmark {
-  def apply(ecNameMap: Map[Object, String])(load: () => Any)(showResult: Boolean=false) = {
-    new Benchmark(ecNameMap: Map[Object, String], load, showResult)
+  def apply(load: () => Any = DefaultLoad.run, showResult: Boolean=false) = {
+    new Benchmark(load, showResult)
   }
 }

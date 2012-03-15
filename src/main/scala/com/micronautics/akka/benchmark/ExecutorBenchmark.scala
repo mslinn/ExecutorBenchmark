@@ -23,7 +23,7 @@ import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import collection.parallel.ForkJoinTasks
 import collection.immutable.ListMap
-import com.micronautics.akka.ExpensiveCalc
+import com.micronautics.akka.DefaultLoad
 
 /** Sample setup for Benchmark
   * @author Mike Slinn */
@@ -68,7 +68,7 @@ object ExecutorBenchmark extends App {
   }""".format(nProcessors, nProcessors)
   private val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
 
-  val ecNameMap = ListMap(
+  Model.ecNameMap ++= ListMap(
     system1 -> "Akka ActorSystem w/ fork-join-executor",
     system2 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=3",
     system3 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
@@ -81,5 +81,5 @@ object ExecutorBenchmark extends App {
 
   ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
 
-  Benchmark(ecNameMap)(ExpensiveCalc.run)(false) showGui
+  Benchmark() showGui
 }
