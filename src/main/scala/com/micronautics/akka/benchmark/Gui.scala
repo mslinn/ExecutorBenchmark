@@ -29,9 +29,9 @@ import org.jfree.chart.{ChartPanel, ChartFactory}
 import javax.swing.{JPanel, WindowConstants}
 import org.jfree.chart.renderer.category.BarRenderer
 import java.net.URI
-import java.awt.{Paint, Cursor, Desktop}
+import java.awt.{Cursor, Desktop}
 import Model.ecNameMap
-import org.jfree.ui.{RectangleAnchor, HorizontalAlignment, RectangleEdge, RectangleInsets}
+import org.jfree.ui.RectangleInsets
 
 /**
   * @author Mike Slinn */

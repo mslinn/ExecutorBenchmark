@@ -17,10 +17,8 @@ package com.micronautics.akka.benchmark
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-import akka.util.Duration.Inf
 import akka.dispatch.{Await, ExecutionContext, Future}
 import java.util.concurrent.{ExecutorService, Executor}
-import scala.collection.immutable.Map
 import akka.actor.ActorSystem
 import Model.ecNameMap
 import com.micronautics.akka.DefaultLoad
@@ -67,12 +65,10 @@ class Benchmark (var load: () => Any,
       println("Warming up hotspot to test " + executorName)
     parallelTest
     futureTest
-//    Await.ready(futureTest, Inf)
     if (consoleOutput)
       println("\nRunning tests on " + executorName)
     parallelTest
     futureTest
-//    Await.ready(futureTest, Inf)
     if (consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -99,8 +95,7 @@ class Benchmark (var load: () => Any,
             TimedResult(0, null)
         }
     }
-    val x = Await.result(f2, Duration.Inf)
-    x.asInstanceOf[Seq[Any]]
+    Await.result(f2, Duration.Inf).asInstanceOf[Seq[Any]]
   }
 
   def parallelTest: TimedResult[Any] = {

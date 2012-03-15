@@ -23,7 +23,6 @@ import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import collection.parallel.ForkJoinTasks
 import collection.immutable.ListMap
-import com.micronautics.akka.DefaultLoad
 
 /** Sample setup for Benchmark
   * @author Mike Slinn */
