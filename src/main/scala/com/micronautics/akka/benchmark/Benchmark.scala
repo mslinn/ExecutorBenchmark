@@ -28,9 +28,7 @@ import akka.util.Duration
   * Does the heavy lifting for ExecutorBenchmark
   * @author Mike Slinn
   */
-class Benchmark (var load: () => Any,
-                 var showResult: Boolean
-                ) {
+class Benchmark (var load: () => Any, var showResult: Boolean) {
   var consoleOutput: Boolean = true
   val NumInterations: Int = 1000
   implicit var dispatcher: ExecutionContext = null
@@ -45,7 +43,8 @@ class Benchmark (var load: () => Any,
   def stop() { /* not implemented */ }
 
   def run() {
-    println()
+    if (consoleOutput)
+      println()
     ecNameMap.keys.foreach {
       e: Any =>
         if (e.isInstanceOf[ActorSystem]) {
