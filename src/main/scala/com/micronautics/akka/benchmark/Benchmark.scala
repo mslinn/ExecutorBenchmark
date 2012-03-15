@@ -58,12 +58,12 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def doit(test: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    gui.addValue(Model.addTest(test, executorName, parallelTest, true), true)
-    gui.addValue(Model.addTest(test, executorName, futureTest, true), true)
+    gui.addValue(Model.addTest(test, "Parallel " + executorName, parallelTest, true), true)
+    gui.addValue(Model.addTest(test, "Futures "  + executorName, futureTest, true), true)
     if (Benchmark.consoleOutput)
       println("\nRunning tests on " + executorName)
-    gui.addValue(Model.addTest(test, executorName, parallelTest, false), false)
-    gui.addValue(Model.addTest(test, executorName, futureTest, false), false)
+    gui.addValue(Model.addTest(test, "Parallel " + executorName, parallelTest, false), false)
+    gui.addValue(Model.addTest(test, "Futures "  + executorName, futureTest, false), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
