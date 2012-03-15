@@ -80,5 +80,6 @@ object ExecutorBenchmark extends App {
 
   ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
 
-  Benchmark() showGui
+  Benchmark.consoleOutput = true
+  Benchmark().showGui
 }

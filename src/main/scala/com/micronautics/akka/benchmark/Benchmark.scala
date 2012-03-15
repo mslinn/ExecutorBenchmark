@@ -18,19 +18,17 @@ package com.micronautics.akka.benchmark
    limitations under the License. */
 
 import akka.dispatch.{Await, ExecutionContext, Future}
-import java.util.concurrent.{ExecutorService, Executor}
 import akka.actor.ActorSystem
-import Model.ecNameMap
-import com.micronautics.akka.DefaultLoad
 import akka.util.Duration
+import java.util.concurrent.{ExecutorService, Executor}
+import com.micronautics.akka.DefaultLoad
+import Model.ecNameMap
 
 /**
   * Does the heavy lifting for ExecutorBenchmark
   * @author Mike Slinn
   */
 class Benchmark (var load: () => Any, var showResult: Boolean) {
-  var consoleOutput: Boolean = true
-  val NumInterations: Int = 1000
   implicit var dispatcher: ExecutionContext = null
 
 
@@ -43,7 +41,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def stop() { /* not implemented */ }
 
   def run() {
-    if (consoleOutput)
+    if (Benchmark.consoleOutput)
       println()
     ecNameMap.keys.foreach {
       e: Any =>
@@ -59,50 +57,44 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     }
   }
 
-  def doit(test: Object, executorName: String) {
-    if (consoleOutput)
+  def doit(test: Any, executorName: String) {
+    if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    addTest(test, executorName, parallelTest, true)
-    addTest(test, executorName, futureTest, true)
-    if (consoleOutput)
+    Model.addTest(test, executorName, parallelTest, true)
+    Model.addTest(test, executorName, futureTest, true)
+    if (Benchmark.consoleOutput)
       println("\nRunning tests on " + executorName)
-    addTest(test, executorName, parallelTest, false)
-    addTest(test, executorName, futureTest, false)
-    if (consoleOutput)
+    Model.addTest(test, executorName, parallelTest, false)
+    Model.addTest(test, executorName, futureTest, false)
+    if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
 
-  def futureTest: Seq[Any] = {
+  def futureTest: TimedResult[Seq[Any]] = {
     val t0 = System.nanoTime()
     val trFuture = time {
-      for (i <- 1 to NumInterations) yield Future { load() }
+      for (i <- 1 to Benchmark.numInterations) yield Future { load() }
     }("Futures creation time").asInstanceOf[TimedResult[Seq[Future[Any]]]]
 
-    val f2 = Future sequence trFuture.result andThen {
-      case f =>
-        val t1 = System.nanoTime()
-        println("Total time for Akka future version: " + (t1 - t0) / 1000000 + "ms")
-        f match {
-          case Right(timedResult: TimedResult[Any]) =>
-            if (showResult)
-              println("Result using Akka future version: " + timedResult.result)
-            timedResult
-          case Left(exception) =>
-            println(exception.getMessage)
-            TimedResult(0, null)
-          case _ =>
-            TimedResult(0, null)
+    val f2 = Future.sequence(trFuture.results).map { results: Seq[Any] =>
+        val t1: Long = System.nanoTime()
+        if (Benchmark.consoleOutput) {
+          println("Total time for Akka future version: " + (t1 - t0) / 1000000 + "ms")
+          if (showResult)
+            println("Result in " + trFuture.millis + " using Akka future version: " + results)
         }
+        TimedResult(trFuture.millis, results)
     }
-    Await.result(f2, Duration.Inf).asInstanceOf[Seq[Any]]
+    val r = Await.result(f2, Duration.Inf)
+    r.asInstanceOf[TimedResult[Seq[Any]]]
   }
 
-  def parallelTest: TimedResult[Any] = {
+  def parallelTest: TimedResult[Seq[Any]] = {
     val timedResult = time {
-      (1 to NumInterations).par.map { x => load() }
-    }("Parallel collection elapsed time")
-    if (showResult)
-      println("Result using Scala parallel collections: " + timedResult.result)
+      ((1 to Benchmark.numInterations).par.map { x => load() })
+    }("Parallel collection elapsed time").asInstanceOf[TimedResult[Seq[Any]]]
+    if (Benchmark.consoleOutput && showResult)
+      println("Result using Scala parallel collections: " + timedResult.results)
     timedResult
   }
 
@@ -110,13 +102,16 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val t0 = System.nanoTime()
     val result: Any = block
     val t1 = System.nanoTime()
-    if (consoleOutput)
+    if (Benchmark.consoleOutput)
       println(msg + ": "+ (t1 - t0)/1000000 + "ms")
     TimedResult((t1 - t0)/1000000, result)
   }
 }
 
 object Benchmark {
+  var consoleOutput: Boolean = true
+  var numInterations: Int = 1000
+
   def apply(load: () => Any = DefaultLoad.run, showResult: Boolean=false) = {
     new Benchmark(load, showResult)
   }
