@@ -44,9 +44,10 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     ecNameMap.keys.foreach {
       e: Any =>
         if (e.isInstanceOf[ActorSystem]) {
-          dispatcher = e.asInstanceOf[ActorSystem].dispatcher
+          val system = e.asInstanceOf[ActorSystem]
+          dispatcher = system.dispatcher
           doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
-          e.asInstanceOf[ActorSystem].shutdown()
+          system.shutdown()
         } else {
           dispatcher = ExecutionContext.fromExecutor(e.asInstanceOf[Executor])
           doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
@@ -58,16 +59,26 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def doit(test: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    if (Benchmark.doParallelCollections)
-      gui.addValue(Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, true), true)
-    if (Benchmark.doFutures)
-      gui.addValue(Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, true), true)
+    if (Benchmark.doParallelCollections) {
+      val newTest = Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, true)
+      if (Benchmark.showWarmUpTimes)
+        gui.addValue(newTest, true)
+    }
+    if (Benchmark.doFutures) {
+      val newTest = Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, true)
+      if (Benchmark.showWarmUpTimes)
+        gui.addValue(newTest, true)
+    }
     if (Benchmark.consoleOutput)
       println("\nRunning tests on " + executorName)
-    if (Benchmark.doParallelCollections)
-      gui.addValue(Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, false), false)
-    if (Benchmark.doFutures)
-      gui.addValue(Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, false), false)
+    if (Benchmark.doParallelCollections) {
+      val newTest = Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, false)
+      gui.addValue(newTest, false)
+    }
+    if (Benchmark.doFutures) {
+      val newTest = Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, false)
+      gui.addValue(newTest, false)
+    }
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -111,10 +122,14 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
 }
 
 object Benchmark {
+  val strWarmup = "Warm-up"
+  val strTimed = "Timed"
+
   var consoleOutput: Boolean = true
   var numInterations: Int = 1000
-  val doParallelCollections: Boolean = true
-  val doFutures: Boolean = true
+  var doParallelCollections: Boolean = true
+  var doFutures: Boolean = true
+  var showWarmUpTimes: Boolean = false
 
 
   def apply(load: () => Any = DefaultLoad.run, showResult: Boolean=false) = {
