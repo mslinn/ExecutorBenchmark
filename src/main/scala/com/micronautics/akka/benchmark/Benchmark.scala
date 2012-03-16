@@ -58,15 +58,15 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def doit(test: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
-    if (Model.doParallelCollections)
+    if (Benchmark.doParallelCollections)
       gui.addValue(Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, true), true)
-    if (Model.doFutures)
+    if (Benchmark.doFutures)
       gui.addValue(Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, true), true)
     if (Benchmark.consoleOutput)
       println("\nRunning tests on " + executorName)
-    if (Model.doParallelCollections)
+    if (Benchmark.doParallelCollections)
       gui.addValue(Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, false), false)
-    if (Model.doFutures)
+    if (Benchmark.doFutures)
       gui.addValue(Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, false), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
@@ -113,6 +113,9 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
 object Benchmark {
   var consoleOutput: Boolean = true
   var numInterations: Int = 1000
+  val doParallelCollections: Boolean = true
+  val doFutures: Boolean = true
+
 
   def apply(load: () => Any = DefaultLoad.run, showResult: Boolean=false) = {
     new Benchmark(load, showResult)
