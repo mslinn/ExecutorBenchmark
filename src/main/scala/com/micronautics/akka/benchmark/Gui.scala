@@ -21,7 +21,6 @@ import com.micronautics.util.PersistableApp
 import org.joda.time.DateTime
 import java.io.File
 import java.util.Properties
-import scala.swing.event.{WindowClosing, WindowOpened, MousePressed}
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartPanel, ChartFactory}
 import org.jfree.chart.renderer.category.BarRenderer
@@ -30,9 +29,10 @@ import Model.ecNameMap
 import java.awt.{Dimension, Cursor, Desktop}
 import scala.swing._
 import org.jfree.data.category.DefaultCategoryDataset
-import javax.swing.{SwingUtilities, JPanel, WindowConstants}
 import org.jfree.ui.{TextAnchor, RectangleInsets}
 import org.jfree.chart.labels.{ItemLabelPosition, ItemLabelAnchor, StandardCategoryItemLabelGenerator}
+import javax.swing.{JPanel, WindowConstants}
+import scala.swing.event._
 
 /**
   * @author Mike Slinn */
@@ -67,6 +67,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     size = new Dimension(575, 900)
 
     contents = new BoxPanel(Orientation.Vertical) {
+      contents += navigator
       val graphs: JPanel = graphSets
       peer.setBackground(graphs.getBackground)
       peer.add(graphs)
@@ -86,12 +87,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
         saveProperties(locationOnScreen, size)
         sys.exit(0)
     }
-
-    SwingUtilities.invokeLater(new Runnable() {
-      def run() {
-        benchmark.run()
-      }
-    })
 
 
     def graphSets: JPanel = {
@@ -135,6 +130,23 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       props.setProperty("height", size.getHeight.asInstanceOf[Int].toString)
       props.setProperty("lastRun", new DateTime().toString)
       writeProperties(new File("executorBenchmark.properties"), props)
+    }
+  }
+
+  def navigator = new BoxPanel(Orientation.Horizontal) {
+    val buttonRun = new Button("Run")
+    val itemHeight:Int = 20
+    var index = 0
+    buttonRun.size = new Dimension(itemHeight, itemHeight)
+
+    contents += buttonRun
+
+    listenTo(buttonRun)
+
+    reactions += {
+      case ButtonClicked(button) =>
+        if (button==buttonRun)
+          benchmark.run()
     }
   }
 }

@@ -35,6 +35,11 @@ object Model {
 
   /** Contains results that do matter, after hotspot is warmed up */
   val testResultMapHot = new LinkedHashMap[Any,  TestResult]
+  
+  val doParallelCollections: Boolean = true
+
+  val doFutures: Boolean = true
+
 
   def addTest(test: Any, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean): TestResult = {
     val testResult = new TestResult(test, testName, timedResult.millis, timedResult.results)
