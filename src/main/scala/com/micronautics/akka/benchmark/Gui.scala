@@ -34,6 +34,7 @@ import javax.swing.{JPanel, WindowConstants}
 import scala.swing.event._
 import javax.swing.border.EmptyBorder
 import java.util.{Enumeration, Collections, Properties}
+import scala.collection.JavaConversions._
 
 /**
   * @author Mike Slinn */
@@ -62,13 +63,20 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     dataset
   }
 
+  def removeCategorySpaces {
+    val categoryPlot = barChart.getCategoryPlot
+    categoryPlot.getDomainAxis.setCategoryMargin(1.0/Model.ecNameMap.keys.size)
+  }
+
   def computeChartPanelSize {
     var height = barHeight.toInt * Model.ecNameMap.keys.size
     height = math.max(250, height)
     if (Benchmark.showWarmUpTimes)
-      height = height * 2 + 50
+      height = height * 2
     var width = chartPanel.getSize().getWidth.toInt
+    println("chartPanel height was: " + chartPanel.getSize().getHeight.toInt)
     chartPanel.setSize(width, height)
+    println("chartPanel height changed to: " + height)
   }
   
   def top = new MainFrame {
@@ -108,8 +116,10 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       barChart.getLegend.setMargin(20, 0, 0, 0)
       barChart.setAntiAlias(true)
 
-      val renderer = barChart.getCategoryPlot().getRenderer().asInstanceOf[BarRenderer]
+      val categoryPlot = barChart.getCategoryPlot
+      val renderer = categoryPlot.getRenderer().asInstanceOf[BarRenderer]
       renderer.setDrawBarOutline(false)
+      renderer.setItemMargin(0.0)
       renderer.setMaximumBarWidth(1.0/(ecNameMap.keys.size+1))
       renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator())
       renderer.setBaseItemLabelsVisible(true)

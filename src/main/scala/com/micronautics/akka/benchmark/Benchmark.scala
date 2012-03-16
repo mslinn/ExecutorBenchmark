@@ -79,6 +79,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       val newTest = Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, false)
       gui.addValue(newTest, false)
     }
+    gui.removeCategorySpaces
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }

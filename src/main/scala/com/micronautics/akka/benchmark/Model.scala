@@ -28,6 +28,7 @@ case class TimedResult[T](millis: Long, results: T)
 case class TestResult(test: Any, testName: String, millis: Long, result: Any)
 
 object Model {
+  /** Map of Executor to descriptive name */
   var ecNameMap = new LinkedHashMap[Object, String]
 
   /** Contains results that do not matter, executed just to warm up hotspot */
