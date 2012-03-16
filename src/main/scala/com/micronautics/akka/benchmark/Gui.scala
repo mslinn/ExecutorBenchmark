@@ -68,7 +68,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     if (Benchmark.showWarmUpTimes)
       height = height * 2 + 50
     var width = chartPanel.getSize().getWidth.toInt
-    println("width, height=" + width + ", " + height)
     chartPanel.setSize(width, height)
   }
   
@@ -128,7 +127,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     }
 
     private def loadProperties {
-      println("Loading properties")
       val props = readProperties(new File("executorBenchmark.properties"))
       location = new Point(props.getOrElse("x", "0").toInt, props.getOrElse("y", "0").toInt)
       size = new Dimension(props.getOrElse("width", "575").toInt, props.getOrElse("height", "900").toInt)
@@ -206,6 +204,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     reactions += {
       case ButtonClicked(`buttonRun`) =>
         computeChartPanelSize
+        dataset.clear()
         benchmark.run()
       case ButtonClicked(`checkboxParallel`) =>
         Benchmark.doParallelCollections = checkboxParallel.selected

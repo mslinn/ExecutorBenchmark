@@ -45,4 +45,10 @@ object Model {
       testResultMapHot += test -> testResult
     testResult
   }
+
+  def reset {
+    ecNameMap.empty
+    testResultMapHot.empty
+    testResultMapWarmup.empty
+  }
 }

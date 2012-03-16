@@ -33,7 +33,7 @@ object ExecutorBenchmark extends App {
 
   /** Invoked from Benchmark.scala; yes this is horrible, but I just want this to work right now without any fuss */
   def reset {
-    println("************** Resetting executors *******")
+    Model.reset
     val nProcessors = Runtime.getRuntime.availableProcessors
     val esFJP  = new ForkJoinPool()
     val esFTPn = Executors.newFixedThreadPool(nProcessors)
