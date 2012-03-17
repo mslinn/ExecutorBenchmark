@@ -30,11 +30,13 @@ trait PersistableApp {
   self =>
   protected def readProperties(file: File): scala.collection.mutable.Map[String, String] = {
     val props = new Properties
-    val in = new FileInputStream(file)
-    try {
-      props.load(in)
-    } finally {
-      in.close
+    if (file.exists) {
+      val in = new FileInputStream(file)
+      try {
+        props.load(in)
+      } finally {
+        in.close
+      }
     }
     props
   }
