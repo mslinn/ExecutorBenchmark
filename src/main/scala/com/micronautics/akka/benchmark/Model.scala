@@ -29,14 +29,14 @@ case class TestResult(test: Any, testName: String, millis: Long, result: Any)
 
 object Model {
   /** Map of Executor to descriptive name */
-  var ecNameMap = new LinkedHashMap[Object, String]
+  var ecNameMap = new LinkedHashMap[Any, String]
 
   /** Contains results that do not matter, executed just to warm up hotspot */
   val testResultMapWarmup = new LinkedHashMap[Any,  TestResult]
 
   /** Contains results that do matter, after hotspot is warmed up */
   val testResultMapHot = new LinkedHashMap[Any,  TestResult]
-  
+
 
   def addTest(test: Any, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean): TestResult = {
     val testResult = new TestResult(test, testName, timedResult.millis, timedResult.results)

@@ -33,8 +33,7 @@ import org.jfree.chart.labels.{ItemLabelPosition, ItemLabelAnchor, StandardCateg
 import javax.swing.{JPanel, WindowConstants}
 import scala.swing.event._
 import javax.swing.border.EmptyBorder
-import java.util.{Enumeration, Collections, Properties}
-import scala.collection.JavaConversions._
+import java.util.{Collections, Properties}
 
 /**
   * @author Mike Slinn */
@@ -78,7 +77,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     chartPanel.setSize(width, height)
     println("chartPanel height changed to: " + height)
   }
-  
+
   def top = new MainFrame {
     var lastRun: DateTime = new DateTime(0)
 
@@ -89,7 +88,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     contents = new BoxPanel(Orientation.Vertical) {
       val graphs: JPanel = graphSets
       navigator = new Navigator(graphs.getBackground)
-      contents += navigator 
+      contents += navigator
       peer.setBackground(graphs.getBackground)
       peer.add(graphs)
       contents += new Label(" ")
@@ -142,14 +141,9 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       size = new Dimension(props.getOrElse("width", "575").toInt, props.getOrElse("height", "900").toInt)
       lastRun = new DateTime(props.getOrElse("lastRun", "0"))
       Benchmark.showWarmUpTimes       = props.getOrElse("showWarmUpTimes",       "false").toBoolean
-      Benchmark.doParallelCollections = props.getOrElse("doParallelCollections", "true").toBoolean
-      Benchmark.doFutures             = props.getOrElse("doFutures",             "true").toBoolean
       Benchmark.numInterations        = props.getOrElse("numInterations",        "1000").toInt
       Benchmark.consoleOutput         = props.getOrElse("consoleOutput",         "true").toBoolean
-      navigator.checkboxFutures.selected    = Benchmark.doFutures
-      navigator.checkboxParallel.selected   = Benchmark.doParallelCollections
       navigator.checkboxShowWarmup.selected = Benchmark.showWarmUpTimes
-      navigator.enableRunButton
     }
 
     private def saveProperties(location: Point, size: Dimension) {
@@ -164,8 +158,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
         }
       }
       props.setProperty("consoleOutput",         Benchmark.consoleOutput.toString)
-      props.setProperty("doFutures",             Benchmark.doFutures.toString)
-      props.setProperty("doParallelCollections", Benchmark.doParallelCollections.toString)
       props.setProperty("numInterations",        Benchmark.numInterations.toString)
       props.setProperty("showWarmUpTimes",       Benchmark.showWarmUpTimes.toString)
       props.setProperty("height",  size.getHeight.asInstanceOf[Int].toString)
@@ -187,28 +179,14 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       border = new EmptyBorder(new Insets(0, 0, 0, gap))
       background = bgColor
     }
-    val checkboxParallel = new CheckBox("Time Scala Parallel Collections") {
-      selected = Benchmark.doParallelCollections
-      border = new EmptyBorder(new Insets(0, 0, 0, gap))
-      background = bgColor
-    }
-    val checkboxFutures = new CheckBox("Time Akka Futures") {
-      selected = Benchmark.doFutures
-      border = new EmptyBorder(new Insets(0, 0, 0, gap))
-      background = bgColor
-    }
 
     val itemHeight:Int = 20
     var index = 0
 
     contents += checkboxShowWarmup
-    contents += checkboxParallel
-    contents += checkboxFutures
     contents += buttonRun
 
     listenTo(checkboxShowWarmup)
-    listenTo(checkboxParallel)
-    listenTo(checkboxFutures)
     listenTo(buttonRun)
 
     reactions += {
@@ -216,22 +194,9 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
         computeChartPanelSize
         dataset.clear()
         benchmark.run()
-      case ButtonClicked(`checkboxParallel`) =>
-        Benchmark.doParallelCollections = checkboxParallel.selected
-        enableRunButton
-        ExecutorBenchmark.reset
-        ExecutorBenchmark.reset
-      case ButtonClicked(`checkboxFutures`) =>
-        Benchmark.doFutures = checkboxFutures.selected
-        enableRunButton
-        ExecutorBenchmark.reset
       case ButtonClicked(`checkboxShowWarmup`) =>
         Benchmark.showWarmUpTimes = checkboxShowWarmup.selected
         ExecutorBenchmark.reset
-    }
-    
-    def enableRunButton {
-      buttonRun.enabled = checkboxFutures.selected || checkboxParallel.selected
     }
   }
 }

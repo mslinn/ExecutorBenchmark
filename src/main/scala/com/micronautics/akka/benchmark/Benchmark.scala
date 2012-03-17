@@ -23,9 +23,10 @@ import akka.util.Duration
 import java.util.concurrent.{ExecutorService, Executor}
 import com.micronautics.akka.DefaultLoad
 import Model.ecNameMap
+import collection.parallel.ForkJoinTasks
 
 /**
-  * Does the heavy lifting for ExecutorBenchmark
+  * Exercises the ExecutorBenchmark loads
   * @author Mike Slinn
   */
 class Benchmark (var load: () => Any, var showResult: Boolean) {
@@ -43,54 +44,31 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.consoleOutput)
       println()
     ecNameMap.keys.foreach {
-      e: Any =>
-        if (e.isInstanceOf[ActorSystem]) {
-          val system = e.asInstanceOf[ActorSystem]
+      ec: Any =>
+        val ecName = ecNameMap.get(ec.asInstanceOf[AnyRef]).get
+        if (ec.isInstanceOf[ActorSystem]) {
+          val system = ec.asInstanceOf[ActorSystem]
           dispatcher = system.dispatcher
-          doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
+          runAkkaFutureLoads(ec, ecName)
           system.shutdown()
-        } else {
-          dispatcher = ExecutionContext.fromExecutor(e.asInstanceOf[Executor])
-          doit(e, ecNameMap.get(e.asInstanceOf[AnyRef]).get)
-          e.asInstanceOf[ExecutorService].shutdown()
+        } else if (ec.isInstanceOf[Int]) {
+          runParallelLoads(ec.asInstanceOf[Int], ecName)
+        } else { // j.u.c.Executor
+          dispatcher = ExecutionContext.fromExecutor(ec.asInstanceOf[Executor])
+          runAkkaFutureLoads(ec, ecName)
+          ec.asInstanceOf[ExecutorService].shutdown()
         }
     }
+    gui.removeCategorySpaces
   }
 
   def reset {
     ExecutorBenchmark.reset
     Model.reset
   }
-  
-  def doit(test: Any, executorName: String) {
-    if (Benchmark.consoleOutput)
-      println("Warming up hotspot to test " + executorName)
-    if (Benchmark.doParallelCollections) {
-      val newTest = Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, true)
-      if (Benchmark.showWarmUpTimes)
-        gui.addValue(newTest, true)
-    }
-    if (Benchmark.doFutures) {
-      val newTest = Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, true)
-      if (Benchmark.showWarmUpTimes)
-        gui.addValue(newTest, true)
-    }
-    if (Benchmark.consoleOutput)
-      println("\nRunning tests on " + executorName)
-    if (Benchmark.doParallelCollections) {
-      val newTest = Model.addTest(test, "Parallel collection w/ " + executorName, parallelTest, false)
-      gui.addValue(newTest, false)
-    }
-    if (Benchmark.doFutures) {
-      val newTest = Model.addTest(test, "Akka Futures w/ "  + executorName, futureTest, false)
-      gui.addValue(newTest, false)
-    }
-    gui.removeCategorySpaces
-    if (Benchmark.consoleOutput)
-      println("\n---------------------------------------------------\n")
-  }
 
-  def futureTest: TimedResult[Seq[Any]] = {
+  def runAkkaFutureLoad: TimedResult[Seq[Any]] = {
+    System.gc(); System.gc(); System.gc()
     val t0 = System.nanoTime()
     val trFuture = time {
       for (i <- 1 to Benchmark.numInterations) yield Future { load() }
@@ -109,13 +87,45 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     r.asInstanceOf[TimedResult[Seq[Any]]]
   }
 
-  def parallelTest: TimedResult[Seq[Any]] = {
+  def runAkkaFutureLoads(executor: Any, executorName: String) {
+    if (Benchmark.consoleOutput)
+      println("Warming up hotspot for executor " + executorName)
+    val newTest1 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, true)
+    if (Benchmark.showWarmUpTimes)
+      gui.addValue(newTest1, true)
+    if (Benchmark.consoleOutput)
+      println("\nRunning tests on " + executorName)
+    val newTest2 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
+    gui.addValue(newTest2, false)
+    if (Benchmark.consoleOutput)
+      println("\n---------------------------------------------------\n")
+  }
+
+  def runParallelLoad: TimedResult[Seq[Any]] = {
+    System.gc(); System.gc(); System.gc()
     val timedResult = time {
       ((1 to Benchmark.numInterations).par.map { x => load() })
     }("Parallel collection elapsed time").asInstanceOf[TimedResult[Seq[Any]]]
     if (Benchmark.consoleOutput && showResult)
       println("Result in " + timedResult.millis + " using Scala parallel collections: " + timedResult.results)
     timedResult
+  }
+
+  def runParallelLoads(nProcessors: Int, executorName: String) {
+    ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
+    // coming in Scala 2.10 according to Aleksandar Prokopec:
+    //scala.collection.parallel.mutable.ParArray(1, 2, 3).tasksupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(2))
+
+    val msg = "Scala parallel collections using %d processors".format(nProcessors)
+    if (Benchmark.consoleOutput)
+      println("Warming up hotspot for " + msg)
+    val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
+    if (Benchmark.showWarmUpTimes)
+      gui.addValue(newTest1, true)
+    val newTest2 = Model.addTest(nProcessors, msg, runParallelLoad, false)
+    gui.addValue(newTest2, false)
+    if (Benchmark.consoleOutput)
+      println("\n---------------------------------------------------\n")
   }
 
   def time(block: => Any)(msg: String="Elapsed time"): TimedResult[Any] = {
@@ -134,8 +144,6 @@ object Benchmark {
 
   var consoleOutput: Boolean = true
   var numInterations: Int = 1000
-  var doParallelCollections: Boolean = true
-  var doFutures: Boolean = true
   var showWarmUpTimes: Boolean = false
 
 

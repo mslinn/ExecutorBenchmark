@@ -21,7 +21,6 @@ import akka.jsr166y.ForkJoinPool
 import java.util.concurrent.Executors
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
-import collection.parallel.ForkJoinTasks
 import scala.collection.mutable.LinkedHashMap
 
 /** Sample setup for Benchmark
@@ -35,7 +34,7 @@ object ExecutorBenchmark extends App {
   def reset {
     Model.reset
     val nProcessors = Runtime.getRuntime.availableProcessors
-    val esFJP  = new ForkJoinPool()
+    val esFJP  = new ForkJoinPool(nProcessors)
     val esFTPn = Executors.newFixedThreadPool(nProcessors)
     val esFTP1 = Executors.newFixedThreadPool(1)
     val esCTP  = Executors.newCachedThreadPool()
@@ -79,16 +78,16 @@ object ExecutorBenchmark extends App {
     val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
 
     Model.ecNameMap = LinkedHashMap(
-      system1 -> "ActorSystem & fork-join-executor",
-      system2 -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
-      //system3 -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
-      esFJP   -> "Updated ForkJoinPool",
-      //esFTP1  -> "FixedThreadPool w/ nProcessors=1",
-      esFTPn  -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
-      esCTP   -> "CachedThreadPool"
-      //esSTE   -> "SingleThreadExecutor"
+      //1           -> "", // parallel collection
+      nProcessors -> "", // parallel collection
+      //system1     -> "ActorSystem & fork-join-executor",
+      //system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
+      //system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
+      //esFJP       -> "Updated ForkJoinPool",
+      //esFTP1      -> "FixedThreadPool w/ nProcessors=1",
+      //esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
+      esCTP       -> "CachedThreadPool"
+      //esSTE       -> "SingleThreadExecutor"
     )
-
-    ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
   }
 }
