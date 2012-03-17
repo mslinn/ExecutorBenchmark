@@ -62,6 +62,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
         }
         gui.removeCategorySpaces
     }
+    gui.resize
   }
 
   def reset {

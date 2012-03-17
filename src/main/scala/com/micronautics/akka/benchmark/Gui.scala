@@ -44,7 +44,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   private val barChart = ChartFactory.createStackedBarChart("", "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
   private var chartPanel: ChartPanel = null
   private var navigator: Navigator = null
-  private val barHeight = 125
+  private val barHeight = 50
   private val numericFieldIterations = new JNumericField(9, JNumericField.INTEGER)
   private val numericFieldRuns       = new JNumericField(3, JNumericField.INTEGER)
 
@@ -61,7 +61,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
   attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
 
-
   def addValue(testResults: TestResult2, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
     dataset.addValue(testResults.millisStdDev, colName + " std. dev.", testResults.testName + colName)
@@ -76,16 +75,22 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
   def computeChartPanelSize {
     var height = barHeight.toInt * Model.ecNameMap.keys.size
-    height = math.max(250, height)
+    //height = math.max(250, height)
     if (Benchmark.showWarmUpTimes)
       height = height * 2
     var width = chartPanel.getSize().getWidth.toInt
-    println("chartPanel height was: " + chartPanel.getSize().getHeight.toInt)
+    //println("chartPanel height was: " + chartPanel.getSize().getHeight.toInt)
     chartPanel.setSize(width, height)
-    println("chartPanel height changed to: " + height)
+    //println("chartPanel height changed to: " + height)
   }
 
-  def top = new MainFrame {
+  def resize {
+    barChart.fireChartChanged()
+    chartPanel.setSize(chartPanel.getPreferredSize)
+    top.peer.setSize(top.peer.getPreferredSize)
+  }
+
+  val top = new MainFrame {
     var lastRun: DateTime = new DateTime(0)
 
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
