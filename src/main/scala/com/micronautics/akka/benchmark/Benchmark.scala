@@ -58,8 +58,8 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
           runAkkaFutureLoads(ec, ecName)
           ec.asInstanceOf[ExecutorService].shutdown()
         }
+        gui.removeCategorySpaces
     }
-    gui.removeCategorySpaces
   }
 
   def reset {

@@ -40,10 +40,6 @@ object ExecutorBenchmark extends App {
     val esCTP  = Executors.newCachedThreadPool()
     val esSTE  = Executors.newSingleThreadExecutor()
 
-    println("esFJP.isShutdown=" + esFJP.isShutdown)
-    println("esFJP.isTerminated=" + esFJP.isTerminated)
-    println("esFJP.isTerminating=" + esFJP.isTerminating)
-
     val configString1: String = """akka {
       logConfigOnStart=off
       executor = "fork-join-executor"
