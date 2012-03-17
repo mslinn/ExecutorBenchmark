@@ -13,7 +13,7 @@ scalaVersion in update := "2.9.1"
 
 autoCompilerPlugins := true
 
-javaOptions in run += "-Xbatch -server -Xmx1G -Xms1G"
+javaOptions in run += "-Xbatch -server -Xmx1G -Xms1G -XX:PermSize=64m -XX:MaxPermSize=64m"
 
 resolvers ++= Seq(
   "Akka Snapshots"           at "http://akka.io/snapshots",
