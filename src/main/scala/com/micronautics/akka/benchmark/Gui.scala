@@ -30,19 +30,21 @@ import scala.swing._
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.ui.{TextAnchor, RectangleInsets}
 import org.jfree.chart.labels.{ItemLabelPosition, ItemLabelAnchor, StandardCategoryItemLabelGenerator}
-import javax.swing.{JPanel, WindowConstants}
 import scala.swing.event._
 import javax.swing.border.EmptyBorder
 import java.util.{Collections, Properties}
+import com.lamatek.swingextras.JNumericField
+import javax.swing.{JTextField, JPanel, WindowConstants}
 
 /**
   * @author Mike Slinn */
 class Gui (benchmark: Benchmark) extends SimpleSwingApplication with PersistableApp {
   private val dataset = new DefaultCategoryDataset()
   private val barChart = ChartFactory.createBarChart("", "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
-  var chartPanel: ChartPanel = null
-  var navigator: Navigator = null
-  val barHeight = 125
+  private var chartPanel: ChartPanel = null
+  private var navigator: Navigator = null
+  private val barHeight = 125
+  private val numericField = new JNumericField(9, JNumericField.INTEGER)
 
   private val attribution = new Label() { // The license requires this block to remain untouched
     text = "Copyright Micronautics Research Corporation. All rights reserved."
@@ -56,6 +58,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
 
   attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
+
 
   def addValue(testResult: TestResult, isWarmup: Boolean): DefaultCategoryDataset = {
     dataset.addValue(testResult.millis, testResult.testName, if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed)
@@ -144,6 +147,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       Benchmark.numInterations        = props.getOrElse("numInterations",        "1000").toInt
       Benchmark.consoleOutput         = props.getOrElse("consoleOutput",         "true").toBoolean
       navigator.checkboxShowWarmup.selected = Benchmark.showWarmUpTimes
+      numericField.setValue(Benchmark.numInterations)
     }
 
     private def saveProperties(location: Point, size: Dimension) {
@@ -183,7 +187,12 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     val itemHeight:Int = 20
     var index = 0
 
+    numericField.setMaximumSize(new Dimension(numericField.getPreferredSize.getWidth.toInt, itemHeight))
+    numericField.setAlignmentX(4) // RIGHT
+
     contents += checkboxShowWarmup
+    peer.add(numericField)
+    contents += new Label(" iterations      ")
     contents += buttonRun
 
     listenTo(checkboxShowWarmup)
@@ -192,8 +201,9 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     reactions += {
       case ButtonClicked(`buttonRun`) =>
         computeChartPanelSize
-        dataset.clear()
-        benchmark.run()
+        dataset.clear
+        Benchmark.numInterations = numericField.getInteger
+        benchmark.run
       case ButtonClicked(`checkboxShowWarmup`) =>
         Benchmark.showWarmUpTimes = checkboxShowWarmup.selected
         ExecutorBenchmark.reset

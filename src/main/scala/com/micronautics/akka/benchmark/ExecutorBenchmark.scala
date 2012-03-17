@@ -79,10 +79,10 @@ object ExecutorBenchmark extends App {
       //system1     -> "ActorSystem & fork-join-executor",
       //system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
       //system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
-      //esFJP       -> "Updated ForkJoinPool",
+      esFJP       -> "Updated ForkJoinPool"
       //esFTP1      -> "FixedThreadPool w/ nProcessors=1",
       //esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
-      esCTP       -> "CachedThreadPool"
+      //esCTP       -> "CachedThreadPool"
       //esSTE       -> "SingleThreadExecutor"
     )
   }
