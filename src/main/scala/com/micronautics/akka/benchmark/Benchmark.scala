@@ -39,6 +39,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   def stop() { /* not implemented */ }
 
   def run() {
+    reset
     if (Benchmark.consoleOutput)
       println()
     ecNameMap.keys.foreach {
@@ -56,6 +57,11 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     }
   }
 
+  def reset {
+    ExecutorBenchmark.reset
+    Model.reset
+  }
+  
   def doit(test: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot to test " + executorName)
