@@ -28,14 +28,15 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka"             % "akka-actor"          % "2.0"       withSources(),
-  "com.github.scala-incubator.io" % "scala-io-core_2.9.1" % "0.3.0"     withSources(),
-  "com.github.scala-incubator.io" % "scala-io-file_2.9.1" % "0.3.0"     withSources(),
-  "org.apache.httpcomponents"     % "httpclient"          % "4.1.2"     withSources(),
-  "org.scala-tools"               % "scala-stm_2.9.1"     % "0.5"       withSources(),
-  "org.scala-tools.time"          % "time_2.9.1"          % "0.5"       ,
-  "org.scala-lang"                % "scala-swing"         % "2.9.1-1"   withSources(),
-  "org.jfree"                     % "jfreechart"          % "1.0.14"    withSources()
+  "com.typesafe.akka"             % "akka-actor"           % "2.0"       withSources(),
+  "com.github.scala-incubator.io" % "scala-io-core_2.9.1"  % "0.3.0"     withSources(),
+  "com.github.scala-incubator.io" % "scala-io-file_2.9.1"  % "0.3.0"     withSources(),
+  "org.apache.httpcomponents"     % "httpclient"           % "4.1.2"     withSources(),
+  "org.scala-tools"               % "scala-stm_2.9.1"      % "0.5"       withSources(),
+  "org.scala-tools.time"          % "time_2.9.1"           % "0.5"       ,
+  "org.scala-lang"                % "scala-swing"          % "2.9.1-1"   withSources(),
+  "org.clapper"                   % "grizzled-scala_2.9.1" % "1.0.12"    withSources(),
+  "org.jfree"                     % "jfreechart"           % "1.0.14"    withSources()
 )
 
 seq(assemblySettings: _*)
