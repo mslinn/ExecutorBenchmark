@@ -97,7 +97,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for executor " + executorName)
     val newTest1 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, true)
-    val newTest1StdDev = 80 // todo make this real
+    val newTest1StdDev = 0 // we only warm up once
     if (Benchmark.showWarmUpTimes)
       gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, newTest1StdDev, newTest1.result), true)
     if (Benchmark.consoleOutput)
@@ -133,7 +133,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for " + msg)
     val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
-    val newTest1StdDev = 80 // todo make this real
+    val newTest1StdDev = 0 // // we only warm up once
     if (Benchmark.showWarmUpTimes)
       gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, newTest1StdDev, newTest1.result), true)
     val newTest2 = Model.addTest(nProcessors, msg, runParallelLoad, false)
