@@ -107,10 +107,12 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
     val results = for (i <- 0 until  Benchmark.numRuns;
       val result = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
-    ) yield TestResult(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, result.millis, result)
-    val millisMean = arithmeticMean(results.map(_.millis) : _*)
-    val stdDev = popStdDev(results.map(_.millis) : _*)
-    gui.addValue(TestResult2(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, millisMean.asInstanceOf[Long], stdDev.asInstanceOf[Long]), false)
+    ) yield TestResult(newTest1.test, "Akka Futures w/ "  + executorName, result.millis, result)
+    val millisMean: Long = arithmeticMean(results.map(_.millis) : _*).asInstanceOf[Long]
+    val stdDev: Long = popStdDev(results.map(_.millis) : _*).asInstanceOf[Long]
+    // std deviation is +/- so subtract from mean and double it to show uncertainty range
+    // midpoint of uncertainty is therefore the mean
+    gui.addValue(TestResult2(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, stdDev*2L, millisMean-stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -143,9 +145,14 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       val test1StdDev = 0 // // we only warm up once
       gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
-    val newTest2 = Model.addTest(nProcessors, msg, runParallelLoad, false)
-    val newTest2StdDev = 50 // todo make this real
-    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev), false)
+    val results = for (i <- 0 until  Benchmark.numRuns;
+      val result = Model.addTest(nProcessors, msg, runParallelLoad, false)
+    ) yield TestResult(newTest1.test, msg, result.millis, result)
+    val millisMean: Long = arithmeticMean(results.map(_.millis) : _*).asInstanceOf[Long]
+    val stdDev: Long = popStdDev(results.map(_.millis) : _*).asInstanceOf[Long]
+    // std deviation is +/- so subtract from mean and double it to show uncertainty range
+    // midpoint of uncertainty is therefore the mean
+    gui.addValue(TestResult2(newTest1.test, msg, stdDev*2L, millisMean-stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
