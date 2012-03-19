@@ -63,7 +63,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
 
   def addValue(testResult: TestResult, isWarmup: Boolean): DefaultCategoryDataset = {
-    val colName = (if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed)
+    val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
     dataset.addValue(50, colName + " std. dev.", testResult.testName)
     dataset.addValue(testResult.millis, colName + " mean", testResult.testName)
     dataset
@@ -196,7 +196,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     val itemHeight:Int = 20
     var index = 0
 
-    numericFieldIterations.setMaximumSize(new Dimension(numericFieldIterations.getPreferredSize.getWidth.toInt, itemHeight))
+    numericFieldIterations.setMaximumSize(new Dimension(65.toInt, itemHeight))
     numericFieldRuns      .setMaximumSize(new Dimension(numericFieldRuns      .getPreferredSize.getWidth.toInt, itemHeight))
     numericFieldIterations.setAlignmentX(4) // RIGHT alignment
     numericFieldRuns      .setAlignmentX(4) // RIGHT alignment
