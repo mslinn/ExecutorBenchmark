@@ -76,11 +76,11 @@ object ExecutorBenchmark extends App {
     Model.ecNameMap = LinkedHashMap(
       //1           -> "", // parallel collection
       nProcessors -> "", // parallel collection
-      //system1     -> "ActorSystem & fork-join-executor",
+      system1     -> "ActorSystem & fork-join-executor",
       //system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
       //system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
-      esFJP       -> "Updated ForkJoinPool"
-      //esFTP1      -> "FixedThreadPool w/ nProcessors=1",
+      esFJP       -> "Updated ForkJoinPool",
+      esFTP1      -> "FixedThreadPool w/ nProcessors=1"
       //esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
       //esCTP       -> "CachedThreadPool"
       //esSTE       -> "SingleThreadExecutor"

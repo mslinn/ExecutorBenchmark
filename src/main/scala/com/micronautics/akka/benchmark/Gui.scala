@@ -41,7 +41,7 @@ import java.awt.event.{FocusEvent, FocusAdapter}
   * @author Mike Slinn */
 class Gui (benchmark: Benchmark) extends SimpleSwingApplication with PersistableApp {
   private val dataset = new DefaultCategoryDataset()
-  private val barChart = ChartFactory.createBarChart("", "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
+  private val barChart = ChartFactory.createStackedBarChart("", "", "milliseconds",  dataset, PlotOrientation.HORIZONTAL, true, true, false)
   private var chartPanel: ChartPanel = null
   private var navigator: Navigator = null
   private val barHeight = 125
@@ -63,7 +63,9 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
 
   def addValue(testResult: TestResult, isWarmup: Boolean): DefaultCategoryDataset = {
-    dataset.addValue(testResult.millis, testResult.testName, if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed)
+    val colName = (if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed)
+    dataset.addValue(50, colName + " std. dev.", testResult.testName)
+    dataset.addValue(testResult.millis, colName + " mean", testResult.testName)
     dataset
   }
 
