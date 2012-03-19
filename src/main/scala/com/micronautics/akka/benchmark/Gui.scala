@@ -62,10 +62,10 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
 
 
-  def addValue(testResult: TestResult, isWarmup: Boolean): DefaultCategoryDataset = {
+  def addValue(testResults: TestResult2, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
-    dataset.addValue(50, colName + " std. dev.", testResult.testName)
-    dataset.addValue(testResult.millis, colName + " mean", testResult.testName)
+    dataset.addValue(testResults.millisStdDev, colName + " std. dev.", testResults.testName + colName)
+    dataset.addValue(testResults.millisMean, colName + " mean", testResults.testName + colName)
     dataset
   }
 
@@ -120,6 +120,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       barChart.setPadding(new RectangleInsets(20, 0, 0, 0))
       barChart.setBackgroundPaint(new Color(0.8f, 0.8f, 0.8f))
       barChart.getLegend.setMargin(20, 0, 0, 0)
+      barChart.removeLegend()
       barChart.setAntiAlias(true)
 
       val categoryPlot = barChart.getCategoryPlot

@@ -97,12 +97,14 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for executor " + executorName)
     val newTest1 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, true)
+    val newTest1StdDev = 80 // todo make this real
     if (Benchmark.showWarmUpTimes)
-      gui.addValue(newTest1, true)
+      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, newTest1StdDev, newTest1.result), true)
     if (Benchmark.consoleOutput)
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
     val newTest2 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
-    gui.addValue(newTest2, false)
+    val newTest2StdDev = 50 // todo make this real
+    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev, newTest2.result), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -131,10 +133,12 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for " + msg)
     val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
+    val newTest1StdDev = 80 // todo make this real
     if (Benchmark.showWarmUpTimes)
-      gui.addValue(newTest1, true)
+      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, newTest1StdDev, newTest1.result), true)
     val newTest2 = Model.addTest(nProcessors, msg, runParallelLoad, false)
-    gui.addValue(newTest2, false)
+    val newTest2StdDev = 50 // todo make this real
+    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev, newTest2.result), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
