@@ -67,6 +67,9 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     Model.reset
   }
 
+  /** Exercise load numInterations times using Akka Future; if load is idempotent then each result will be identical.
+   * The load needs to execute long enough that the overhead of the for-comprehension in this method is not noticable.
+    * @return TimedResult containing total time and list of results */
   def runAkkaFutureLoad: TimedResult[Seq[Any]] = {
     System.gc(); System.gc(); System.gc()
     val t0 = System.nanoTime()
@@ -87,6 +90,9 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     r.asInstanceOf[TimedResult[Seq[Any]]]
   }
 
+  /** Run loads at least twice; once to warm up Hotspot using the desired Executor,
+   * and again at least once to time using the warmed up Hotspot. If a standard deviation is desired then the load
+   * should be invoked at least 10 times, perhaps 100 times. */
   def runAkkaFutureLoads(executor: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for executor " + executorName)
@@ -94,13 +100,15 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     if (Benchmark.showWarmUpTimes)
       gui.addValue(newTest1, true)
     if (Benchmark.consoleOutput)
-      println("\nRunning tests on " + executorName)
+      println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
     val newTest2 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
     gui.addValue(newTest2, false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
 
+/** Exercise load numInterations times using Scala parallel collection; if load is idempotent then each result will be identical.
+ * @return TimedResult containing total time and list of results */
   def runParallelLoad: TimedResult[Seq[Any]] = {
     System.gc(); System.gc(); System.gc()
     val timedResult = time {
@@ -111,6 +119,9 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     timedResult
   }
 
+  /** Run loads at least twice; once to warm up Hotspot using the desired Executor,
+   * and again at least once to time using the warmed up Hotspot. If a standard deviation is desired then the load
+   * should be invoked at least 10 times, perhaps 100 times. */
   def runParallelLoads(nProcessors: Int, executorName: String) {
     ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
     // coming in Scala 2.10 according to Aleksandar Prokopec:
@@ -144,6 +155,7 @@ object Benchmark {
 
   var consoleOutput: Boolean = true
   var numInterations: Int = 1000
+  var numRuns: Int = 10
   var showWarmUpTimes: Boolean = false
 
 

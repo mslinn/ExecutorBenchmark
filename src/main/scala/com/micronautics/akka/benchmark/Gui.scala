@@ -34,7 +34,8 @@ import scala.swing.event._
 import javax.swing.border.EmptyBorder
 import java.util.{Collections, Properties}
 import com.lamatek.swingextras.JNumericField
-import javax.swing.{JTextField, JPanel, WindowConstants}
+import javax.swing.{JPanel, WindowConstants}
+import java.awt.event.{FocusEvent, FocusAdapter}
 
 /**
   * @author Mike Slinn */
@@ -44,7 +45,8 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   private var chartPanel: ChartPanel = null
   private var navigator: Navigator = null
   private val barHeight = 125
-  private val numericField = new JNumericField(9, JNumericField.INTEGER)
+  private val numericFieldIterations = new JNumericField(9, JNumericField.INTEGER)
+  private val numericFieldRuns       = new JNumericField(3, JNumericField.INTEGER)
 
   private val attribution = new Label() { // The license requires this block to remain untouched
     text = "Copyright Micronautics Research Corporation. All rights reserved."
@@ -145,9 +147,12 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       lastRun = new DateTime(props.getOrElse("lastRun", "0"))
       Benchmark.showWarmUpTimes       = props.getOrElse("showWarmUpTimes",       "false").toBoolean
       Benchmark.numInterations        = props.getOrElse("numInterations",        "1000").toInt
+      Benchmark.numRuns               = props.getOrElse("numRuns",               "10").toInt
       Benchmark.consoleOutput         = props.getOrElse("consoleOutput",         "true").toBoolean
       navigator.checkboxShowWarmup.selected = Benchmark.showWarmUpTimes
-      numericField.setValue(Benchmark.numInterations)
+      numericFieldIterations.setValue(Benchmark.numInterations)
+      println("Benchmark.numRuns=" + Benchmark.numRuns)
+      numericFieldRuns.setValue(Benchmark.numRuns)
     }
 
     private def saveProperties(location: Point, size: Dimension) {
@@ -161,8 +166,10 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
           keyList.elements()
         }
       }
+      println("Benchmark.numRuns=" + Benchmark.numRuns)
       props.setProperty("consoleOutput",         Benchmark.consoleOutput.toString)
       props.setProperty("numInterations",        Benchmark.numInterations.toString)
+      props.setProperty("numRuns",               Benchmark.numRuns.toString)
       props.setProperty("showWarmUpTimes",       Benchmark.showWarmUpTimes.toString)
       props.setProperty("height",  size.getHeight.asInstanceOf[Int].toString)
       props.setProperty("lastRun", new DateTime().toString)
@@ -176,7 +183,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   class Navigator(bgColor: Color) extends BoxPanel(Orientation.Horizontal) {
     val gap = 25
     background = bgColor
-    val buttonRun = new Button("Run")
+    val buttonRun = new Button("Start")
     buttonRun.size = new Dimension(itemHeight, itemHeight)
     val checkboxShowWarmup = new CheckBox("Show warm-up times") {
       selected = Benchmark.showWarmUpTimes
@@ -187,22 +194,35 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     val itemHeight:Int = 20
     var index = 0
 
-    numericField.setMaximumSize(new Dimension(numericField.getPreferredSize.getWidth.toInt, itemHeight))
-    numericField.setAlignmentX(4) // RIGHT
+    numericFieldIterations.setMaximumSize(new Dimension(numericFieldIterations.getPreferredSize.getWidth.toInt, itemHeight))
+    numericFieldRuns      .setMaximumSize(new Dimension(numericFieldRuns      .getPreferredSize.getWidth.toInt, itemHeight))
+    numericFieldIterations.setAlignmentX(4) // RIGHT alignment
+    numericFieldRuns      .setAlignmentX(4) // RIGHT alignment
 
-    contents += checkboxShowWarmup
-    peer.add(numericField)
+    peer.add(numericFieldRuns)
+    contents += new Label(" runs of ")
+    peer.add(numericFieldIterations)
     contents += new Label(" iterations      ")
+    contents += checkboxShowWarmup
     contents += buttonRun
 
     listenTo(checkboxShowWarmup)
     listenTo(buttonRun)
+    numericFieldIterations.addFocusListener(new FocusAdapter() {
+      override def focusLost(e: FocusEvent) {
+        Benchmark.numInterations = numericFieldIterations.getInteger
+      }
+    })
+    numericFieldRuns.addFocusListener(new FocusAdapter() {
+      override def focusLost(e: FocusEvent) {
+        Benchmark.numRuns = numericFieldRuns.getInteger
+      }
+    })
 
     reactions += {
       case ButtonClicked(`buttonRun`) =>
         computeChartPanelSize
         dataset.clear
-        Benchmark.numInterations = numericField.getInteger
         benchmark.run
       case ButtonClicked(`checkboxShowWarmup`) =>
         Benchmark.showWarmUpTimes = checkboxShowWarmup.selected
