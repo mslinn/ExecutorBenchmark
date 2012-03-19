@@ -24,6 +24,8 @@ import java.util.concurrent.{ExecutorService, Executor}
 import com.micronautics.akka.DefaultLoad
 import Model.ecNameMap
 import collection.parallel.ForkJoinTasks
+import Numeric._
+import grizzled.math.stats.{arithmeticMean, popStdDev, populationVariance}
 
 /**
   * Exercises the ExecutorBenchmark loads
@@ -68,7 +70,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
   }
 
   /** Exercise load numInterations times using Akka Future; if load is idempotent then each result will be identical.
-   * The load needs to execute long enough that the overhead of the for-comprehension in this method is not noticable.
+   * The load needs to execute long enough that the overhead of the for-comprehension and Future.sequence in this method is not noticable.
     * @return TimedResult containing total time and list of results */
   def runAkkaFutureLoad: TimedResult[Seq[Any]] = {
     System.gc(); System.gc(); System.gc()
@@ -99,13 +101,16 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val newTest1 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // we only warm up once
-      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev, newTest1.result), true)
+      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
     if (Benchmark.consoleOutput)
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
-    val newTest2 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
-    val newTest2StdDev = 50 // todo make this real
-    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev, newTest2.result), false)
+    val results = for (i <- 0 until  Benchmark.numRuns;
+      val result = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, false)
+    ) yield TestResult(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, result.millis, result)
+    val millisMean = arithmeticMean(results.map(_.millis) : _*)
+    val stdDev = popStdDev(results.map(_.millis) : _*)
+    gui.addValue(TestResult2(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, millisMean.asInstanceOf[Long], stdDev.asInstanceOf[Long]), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -136,11 +141,11 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // // we only warm up once
-      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev, newTest1.result), true)
+      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
     val newTest2 = Model.addTest(nProcessors, msg, runParallelLoad, false)
     val newTest2StdDev = 50 // todo make this real
-    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev, newTest2.result), false)
+    gui.addValue(TestResult2(newTest2.test, newTest2.testName, newTest2.millis, newTest2StdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
