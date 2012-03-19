@@ -61,6 +61,10 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
   attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
 
+  def resize {
+    chartPanel.setSize(chartPanel.getPreferredSize)
+    top.peer.setSize(top.peer.getPreferredSize)
+  }
 
   def addValue(testResults: TestResult2, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
@@ -85,7 +89,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     println("chartPanel height changed to: " + height)
   }
 
-  def top = new MainFrame {
+  val top = new MainFrame {
     var lastRun: DateTime = new DateTime(0)
 
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
