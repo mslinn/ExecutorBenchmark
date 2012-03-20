@@ -34,8 +34,8 @@ import scala.swing.event._
 import javax.swing.border.EmptyBorder
 import java.util.{Collections, Properties}
 import com.lamatek.swingextras.JNumericField
-import javax.swing.{JPanel, WindowConstants}
 import java.awt.event.{FocusEvent, FocusAdapter}
+import javax.swing.{UIManager, JPanel, WindowConstants}
 
 /**
   * @author Mike Slinn */
@@ -96,6 +96,11 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
     title = "Executor Benchmark v0.1"
     size = new Dimension(575, 900)
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+    } catch {
+      case ex => println("Error setting native LAF: " + ex)
+    }
 
     contents = new BoxPanel(Orientation.Vertical) {
       val graphs: JPanel = graphSets
