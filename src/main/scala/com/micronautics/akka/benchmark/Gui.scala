@@ -159,7 +159,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       Benchmark.consoleOutput         = props.getOrElse("consoleOutput",         "true").toBoolean
       navigator.checkboxShowWarmup.selected = Benchmark.showWarmUpTimes
       numericFieldIterations.setValue(Benchmark.numInterations)
-      println("Benchmark.numRuns=" + Benchmark.numRuns)
       numericFieldRuns.setValue(Benchmark.numRuns)
     }
 

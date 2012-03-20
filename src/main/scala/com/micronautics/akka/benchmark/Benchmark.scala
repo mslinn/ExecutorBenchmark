@@ -21,7 +21,7 @@ import akka.dispatch.{Await, ExecutionContext, Future}
 import akka.actor.ActorSystem
 import akka.util.Duration
 import java.util.concurrent.{ExecutorService, Executor}
-import com.micronautics.akka.DefaultLoad
+import com.micronautics.akka.DefaultLoads
 import Model.ecNameMap
 import collection.parallel.ForkJoinTasks
 import Numeric._
@@ -178,7 +178,7 @@ object Benchmark {
   var showWarmUpTimes: Boolean = false
 
 
-  def apply(load: () => Any = DefaultLoad.run, showResult: Boolean=false) = {
+  def apply(load: () => Any = DefaultLoads.cpuIntensive, showResult: Boolean=false) = {
     new Benchmark(load, showResult)
   }
 }

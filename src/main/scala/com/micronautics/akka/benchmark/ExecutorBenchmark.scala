@@ -22,13 +22,14 @@ import java.util.concurrent.Executors
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import scala.collection.mutable.LinkedHashMap
+import com.micronautics.akka.DefaultLoads
 
 /** Sample setup for Benchmark
   * @author Mike Slinn */
 object ExecutorBenchmark extends App {
   Benchmark.consoleOutput = true
   reset
-  Benchmark().showGui
+  Benchmark(DefaultLoads.ioBound).showGui
 
   /** Invoked from Benchmark.scala; yes this is horrible, but I just want this to work right now without any fuss */
   def reset {
@@ -74,16 +75,16 @@ object ExecutorBenchmark extends App {
     val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
 
     Model.ecNameMap = LinkedHashMap(
-      //1           -> "", // parallel collection
+      1           -> "", // parallel collection
       nProcessors -> "", // parallel collection
       system1     -> "ActorSystem & fork-join-executor",
-      //system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
-      //system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
+      system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
+      system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
       esFJP       -> "Updated ForkJoinPool",
-      esFTP1      -> "FixedThreadPool w/ nProcessors=1"
-      //esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
-      //esCTP       -> "CachedThreadPool"
-      //esSTE       -> "SingleThreadExecutor"
+      esFTP1      -> "FixedThreadPool w/ nProcessors=1",
+      esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
+      esCTP       -> "CachedThreadPool",
+      esSTE       -> "SingleThreadExecutor"
     )
   }
 }
