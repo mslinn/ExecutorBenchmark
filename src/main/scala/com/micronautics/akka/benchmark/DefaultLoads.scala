@@ -43,7 +43,7 @@ object DefaultLoads {
   }
 
 
-  /** Simulate an IO bound task (web spider) */
+  /** Simulate an IO-bound task (web spider) */
   def ioBound(): Any = { simulateSpider(30, fetchCount) }
 
   private def simulateSpider(maxDelay: Int,  nrOfFetches: Int) {

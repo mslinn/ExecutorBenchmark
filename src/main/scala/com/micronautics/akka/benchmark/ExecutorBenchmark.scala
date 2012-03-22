@@ -29,7 +29,7 @@ import com.micronautics.akka.DefaultLoads
 object ExecutorBenchmark extends App {
   Benchmark.consoleOutput = true
   reset
-  Benchmark(DefaultLoads.ioBound).showGui
+  Benchmark(DefaultLoads.cpuIntensive).showGui
 
   /** Invoked from Benchmark.scala; yes this is horrible, but I just want this to work right now without any fuss */
   def reset {
