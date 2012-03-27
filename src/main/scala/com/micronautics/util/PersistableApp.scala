@@ -17,9 +17,9 @@ package com.micronautics.util
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-import java.util.Properties
 import java.io.{FileOutputStream, OutputStream, FileInputStream, File}
 import scala.collection.JavaConversions._
+import java.util.{Collections, Properties}
 
 /**
   * Provides ability for a Swing app to save and restore to a properties file.
@@ -48,5 +48,17 @@ trait PersistableApp {
     } finally {
       out.close
     }
+  }
+}
+
+/** Writes properties in alpha order */
+class SortedProperties extends Properties {
+  override def keys = {
+    var keyList = new java.util.Vector[Object]()
+    var keysEnum = super.keys()
+    while (keysEnum.hasMoreElements())
+      keyList.add(keysEnum.nextElement())
+    Collections.sort(keyList.asInstanceOf[java.util.Vector[String]])
+    keyList.elements()
   }
 }

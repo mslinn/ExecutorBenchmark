@@ -17,25 +17,24 @@ package com.micronautics.akka.benchmark
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-import com.micronautics.util.PersistableApp
 import org.joda.time.DateTime
 import java.io.File
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.{ChartPanel, ChartFactory}
 import org.jfree.chart.renderer.category.BarRenderer
-import java.net.URI
 import Model.ecNameMap
-import java.awt.{Dimension, Cursor, Desktop}
+import java.awt.Dimension
 import scala.swing._
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.ui.{TextAnchor, RectangleInsets}
 import org.jfree.chart.labels.{ItemLabelPosition, ItemLabelAnchor, StandardCategoryItemLabelGenerator}
 import scala.swing.event._
 import javax.swing.border.EmptyBorder
-import java.util.{Collections, Properties}
 import com.lamatek.swingextras.JNumericField
 import java.awt.event.{FocusEvent, FocusAdapter}
 import javax.swing.{UIManager, JPanel, WindowConstants}
+import com.micronautics.util.{SortedProperties, PersistableApp}
+import com.micronautics.Attribution
 
 /**
   * @author Mike Slinn */
@@ -47,19 +46,6 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   private val barHeight = 50
   private val numericFieldIterations = new JNumericField(9, JNumericField.INTEGER)
   private val numericFieldRuns       = new JNumericField(3, JNumericField.INTEGER)
-
-  private val attribution = new Label() { // The license requires this block to remain untouched
-    text = "Copyright Micronautics Research Corporation. All rights reserved."
-    cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-    listenTo(mouse.clicks, mouse.moves)
-    reactions += {
-      case MousePressed(src, point, i1, i2, b) =>
-        Desktop.getDesktop.browse(new URI("http://micronauticsresearch.com"))
-    }
-  }
-
-
-  attribution.peer.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT)
 
   def addValue(testResults: TestResult2, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
@@ -91,6 +77,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   }
 
   val top = new MainFrame {
+    val propertyFileName = "executorBenchmark.properties"
     var lastRun: DateTime = new DateTime(0)
 
     peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
@@ -110,7 +97,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
       peer.add(graphs)
       contents += new Label(" ")
       contents += new Label(" ")
-      contents += attribution
+      contents += Attribution.attribution
       border = Swing.EmptyBorder(30, 30, 10, 30)
     }
     pack
@@ -154,41 +141,32 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     }
 
     private def loadProperties {
-      val props = readProperties(new File("executorBenchmark.properties"))
+      val props = readProperties(new File(propertyFileName))
       location = new Point(props.getOrElse("x", "0").toInt, props.getOrElse("y", "0").toInt)
       size = new Dimension(props.getOrElse("width", "575").toInt, props.getOrElse("height", "900").toInt)
       lastRun = new DateTime(props.getOrElse("lastRun", "0"))
-      Benchmark.showWarmUpTimes       = props.getOrElse("showWarmUpTimes",       "false").toBoolean
-      Benchmark.numInterations        = props.getOrElse("numInterations",        "1000").toInt
-      Benchmark.numRuns               = props.getOrElse("numRuns",               "10").toInt
-      Benchmark.consoleOutput         = props.getOrElse("consoleOutput",         "true").toBoolean
+      Benchmark.showWarmUpTimes = props.getOrElse("showWarmUpTimes", "false").toBoolean
+      Benchmark.numInterations  = props.getOrElse("numInterations",  "1000").toInt
+      Benchmark.numRuns         = props.getOrElse("numRuns",         "10").toInt
+      Benchmark.consoleOutput   = props.getOrElse("consoleOutput",   "true").toBoolean
       navigator.checkboxShowWarmup.selected = Benchmark.showWarmUpTimes
       numericFieldIterations.setValue(Benchmark.numInterations)
       numericFieldRuns.setValue(Benchmark.numRuns)
     }
 
     private def saveProperties(location: Point, size: Dimension) {
-      val props = new Properties { // write properties in alpha order
-        override def keys = {
-          var keyList = new java.util.Vector[Object]()
-          var keysEnum = super.keys()
-          while (keysEnum.hasMoreElements())
-            keyList.add(keysEnum.nextElement())
-          Collections.sort(keyList.asInstanceOf[java.util.Vector[String]])
-          keyList.elements()
-        }
-      }
+      val props = new SortedProperties
       println("Benchmark.numRuns=" + Benchmark.numRuns)
-      props.setProperty("consoleOutput",         Benchmark.consoleOutput.toString)
-      props.setProperty("numInterations",        Benchmark.numInterations.toString)
-      props.setProperty("numRuns",               Benchmark.numRuns.toString)
-      props.setProperty("showWarmUpTimes",       Benchmark.showWarmUpTimes.toString)
+      props.setProperty("consoleOutput",   Benchmark.consoleOutput.toString)
+      props.setProperty("numInterations",  Benchmark.numInterations.toString)
+      props.setProperty("numRuns",         Benchmark.numRuns.toString)
+      props.setProperty("showWarmUpTimes", Benchmark.showWarmUpTimes.toString)
       props.setProperty("height",  size.getHeight.asInstanceOf[Int].toString)
       props.setProperty("lastRun", new DateTime().toString)
       props.setProperty("width",   size.getWidth.asInstanceOf[Int].toString)
       props.setProperty("x",       location.getX.asInstanceOf[Int].toString)
       props.setProperty("y",       location.getY.asInstanceOf[Int].toString)
-      writeProperties(new File("executorBenchmark.properties"), props)
+      writeProperties(new File(propertyFileName), props)
     }
   }
 
