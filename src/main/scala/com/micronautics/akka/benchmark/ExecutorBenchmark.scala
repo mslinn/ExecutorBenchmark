@@ -74,17 +74,18 @@ object ExecutorBenchmark extends App {
     }""".format(nProcessors, nProcessors)
     val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
 
+    // labels are short so they fit on the Y axis
     Model.ecNameMap = LinkedHashMap(
-      1           -> "", // parallel collection
-      nProcessors -> "", // parallel collection
-      system1     -> "ActorSystem & fork-join-executor",
-      system2     -> "ActorSystem & thread-pool-executor, parallelism-factor=3",
-      system3     -> "Akka ActorSystem w/ thread-pool-executor & parallelism-factor=1",
-      esFJP       -> "Updated ForkJoinPool",
-      esFTP1      -> "FixedThreadPool w/ nProcessors=1",
-      esFTPn      -> "FixedThreadPool w/ nProcessors=%d".format(nProcessors),
-      esCTP       -> "CachedThreadPool",
-      esSTE       -> "SingleThreadExecutor"
+      1           -> "PC 1",      // parallel collection with 1 thread
+      nProcessors -> "PC %d".format(nProcessors), // parallel collection with nProcessor threads
+      system1     -> "Akka FJ",
+      system2     -> "Akks TP 3",
+      system3     -> "Akka TP 1", // ActorSystem thread-pool-executor & parallelism-factor=1
+      esFJP       -> "Akka FJP",  // ActorSystem ForkJoinPool
+      esFTP1      -> "FT 1",      // FixedThreadPool w/ nProcessors=1
+      esFTPn      -> "FT %d".format(nProcessors), // FixedThreadPool w/ nProcessors
+      esCTP       -> "CT",        // CachedThreadPool
+      esSTE       -> "ST"         // SingleThreadExecutor
     )
   }
 }
