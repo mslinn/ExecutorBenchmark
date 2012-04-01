@@ -50,7 +50,7 @@ object ExecutorBenchmark extends App {
           parallelism-max = %d
       }
     }""".format(nProcessors, nProcessors)
-    val system1 = ActorSystem.apply("default1", ConfigFactory.parseString(configString1))
+    val system1 = ActorSystem("default1", ConfigFactory.parseString(configString1))
 
     val configString2: String = """akka {
       logConfigOnStart=off
@@ -61,7 +61,7 @@ object ExecutorBenchmark extends App {
           core-pool-size-max = %d
       }
     }""".format(nProcessors, nProcessors)
-    val system2 = ActorSystem.apply("default2", ConfigFactory.parseString(configString2))
+    val system2 = ActorSystem("default2", ConfigFactory.parseString(configString2))
 
     val configString3: String = """akka {
       logConfigOnStart=off
@@ -72,7 +72,7 @@ object ExecutorBenchmark extends App {
           core-pool-size-max = %d
       }
     }""".format(nProcessors, nProcessors)
-    val system3 = ActorSystem.apply("default2", ConfigFactory.parseString(configString3))
+    val system3 = ActorSystem("default2", ConfigFactory.parseString(configString3))
 
     // labels are short so they fit on the Y axis
     Model.ecNameMap = LinkedHashMap(
