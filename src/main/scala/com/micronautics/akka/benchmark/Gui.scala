@@ -47,7 +47,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
   private val numericFieldIterations = new JNumericField(9, JNumericField.INTEGER)
   private val numericFieldRuns       = new JNumericField(3, JNumericField.INTEGER)
 
-  def addValue(testResults: TestResult2, isWarmup: Boolean): DefaultCategoryDataset = {
+  def addValue(testResults: MeanResult, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
     dataset.addValue(testResults.millisStdDev, colName + " std. dev.", testResults.testName + colName)
     dataset.addValue(testResults.millisMean, colName + " mean", testResults.testName + colName)

@@ -44,11 +44,15 @@ object DefaultLoads {
 
 
   /** Simulate an IO-bound task (web spider) */
-  def ioBound(): Any = { simulateSpider(30, fetchCount) }
+  def ioBound(): Any = { simulateSpider(5, 30, fetchCount) }
 
-  private def simulateSpider(maxDelay: Int,  nrOfFetches: Int) {
+  /** @param minDelay minimum time (ms) to sleep per invocation
+    * @param maxDelay maximum time (ms) to sleep per invocation
+   * @param nrOfFetches number of times to repeatedly sleep then run a short computation per invocation */
+  private def simulateSpider(minDelay: Int, maxDelay: Int,  nrOfFetches: Int) {
     for (i <- 0 until nrOfFetches) {
-      Thread.sleep(random.nextInt(maxDelay)) // simulate up to maxDelay ms latency
+      // simulate from minDelay to maxDelay ms latency
+      Thread.sleep(random.nextInt(maxDelay-minDelay) + minDelay)
       calculatePiFor(0, 50) // simulate a tiny amount of computation
     }
   }

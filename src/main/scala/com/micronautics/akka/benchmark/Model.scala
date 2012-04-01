@@ -25,8 +25,11 @@ import scala.collection.mutable.{LinkedHashMap}
 
 case class TimedResult[T](millis: Long, results: T)
 
-case class TestResult(test: Any, testName: String, millis: Long, result: Any)
-case class TestResult2(test: Any, testName: String, millisMean: Long, millisStdDev: Long)
+/** Single test result */
+case class TestResult(test: AnyRef, testName: String, millis: Long, result: Any)
+
+/** Mean of test results with standard deviation */
+case class MeanResult(test: AnyRef, testName: String, millisMean: Long, millisStdDev: Long)
 
 object Model {
   /** Map of Executor to descriptive name */
@@ -39,7 +42,7 @@ object Model {
   val testResultMapHot = new LinkedHashMap[Any,  TestResult]
 
 
-  def addTest(test: Any, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean): TestResult = {
+  def addTest(test: AnyRef, testName: String, timedResult: TimedResult[Seq[Any]], isWarmup: Boolean): TestResult = {
     val testResult = new TestResult(test, testName, timedResult.millis, timedResult.results)
     if (isWarmup)
       testResultMapWarmup += test -> testResult

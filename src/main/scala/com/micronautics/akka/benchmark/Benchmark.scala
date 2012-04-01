@@ -102,7 +102,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val newTest1 = Model.addTest(executor, "Akka Futures w/ "  + executorName, runAkkaFutureLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // we only warm up once
-      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
+      gui.addValue(MeanResult(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
     if (Benchmark.consoleOutput)
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
@@ -113,7 +113,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val stdDev: Long = popStdDev(results.map(_.millis) : _*).asInstanceOf[Long]
     // std deviation is +/- so subtract from mean and double it to show uncertainty range
     // midpoint of uncertainty is therefore the mean
-    gui.addValue(TestResult2(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, stdDev*2L, millisMean-stdDev), false)
+    gui.addValue(MeanResult(runAkkaFutureLoad, "Akka Futures w/ "  + executorName, stdDev*2L, millisMean-stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -144,7 +144,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // // we only warm up once
-      gui.addValue(TestResult2(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
+      gui.addValue(MeanResult(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
     val results = for (i <- 0 until  Benchmark.numRuns;
       val result = Model.addTest(nProcessors, msg, runParallelLoad, false)
@@ -153,7 +153,7 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
     val stdDev: Long = popStdDev(results.map(_.millis) : _*).asInstanceOf[Long]
     // std deviation is +/- so subtract from mean and double it to show uncertainty range
     // midpoint of uncertainty is therefore the mean
-    gui.addValue(TestResult2(newTest1.test, msg, stdDev*2L, millisMean-stdDev), false)
+    gui.addValue(MeanResult(newTest1.test, msg, stdDev*2L, millisMean-stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
