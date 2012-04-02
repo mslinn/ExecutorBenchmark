@@ -30,10 +30,13 @@ import grizzled.math.stats.{arithmeticMean, popStdDev, populationVariance}
 /**
   * Exercises the ExecutorBenchmark loads
   * @author Mike Slinn
+  * 
+  * @param load no-args functor that can return any type of result
+  * @param showResult determines if the result should be displayed on the console or not
   */
-class Benchmark (var load: () => Any, var showResult: Boolean) {
-  val gui = new Gui(this)
-  implicit var dispatcher: ExecutionContext = null
+class Benchmark (val load: () => Any, val showResult: Boolean) {
+  private val gui = new Gui(this)
+  private implicit var dispatcher: ExecutionContext = null
 
 
   /** Swing view */
@@ -47,18 +50,21 @@ class Benchmark (var load: () => Any, var showResult: Boolean) {
       println()
     ecNameMap.keys.foreach {
       ec: Any =>
-        val ecName = ecNameMap.get(ec.asInstanceOf[AnyRef]).get
-        if (ec.isInstanceOf[ActorSystem]) {
-          val system = ec.asInstanceOf[ActorSystem]
-          dispatcher = system.dispatcher
-          runAkkaFutureLoads(ec, ecName)
-          system.shutdown()
-        } else if (ec.isInstanceOf[Int]) {
-          runParallelLoads(ec.asInstanceOf[Int], ecName)
-        } else { // j.u.c.Executor
-          dispatcher = ExecutionContext.fromExecutor(ec.asInstanceOf[Executor])
-          runAkkaFutureLoads(ec, ecName)
-          ec.asInstanceOf[ExecutorService].shutdown()
+        val ecName: String = ecNameMap.get(ec.asInstanceOf[AnyRef]).get
+        ec match {
+          case system: ActorSystem =>
+            dispatcher = system.dispatcher
+            runAkkaFutureLoads(ec, ecName)
+            system.shutdown()
+          case parallelism: Int =>
+            runParallelLoads(parallelism, ecName)
+          case jucExecutor: Executor => // j.u.c.Executor assumed
+            dispatcher = ExecutionContext.fromExecutor(jucExecutor)
+            runAkkaFutureLoads(ec, ecName)
+            ec.asInstanceOf[ExecutorService].shutdown()
+          case unknown =>
+            println("Unknown test type: " + unknown)
+            return
         }
         gui.removeCategorySpaces
     }
