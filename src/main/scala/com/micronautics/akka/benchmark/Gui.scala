@@ -49,8 +49,8 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
   def addValue(testResults: MeanResult, isWarmup: Boolean): DefaultCategoryDataset = {
     val colName = if (isWarmup) Benchmark.strWarmup else Benchmark.strTimed
-    dataset.addValue(testResults.millisStdDev, colName + " std. dev.", testResults.testName + colName)
-    dataset.addValue(testResults.millisMean, colName + " mean", testResults.testName + colName)
+    dataset.addValue(testResults.millisStdDev, colName + " std. dev.", testResults.testName + " " + colName)
+    dataset.addValue(testResults.millisMean, colName + " mean", testResults.testName + " " + colName)
     dataset
   }
 
@@ -61,13 +61,10 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
 
   def computeChartPanelSize {
     var height = barHeight.toInt * Model.ecNameMap.keys.size
-    //height = math.max(250, height)
     if (Benchmark.showWarmUpTimes)
       height = height * 2
     var width = chartPanel.getSize().getWidth.toInt
-    //println("chartPanel height was: " + chartPanel.getSize().getHeight.toInt)
     chartPanel.setSize(width, height)
-    //println("chartPanel height changed to: " + height)
   }
 
   def resize {

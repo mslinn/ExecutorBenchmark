@@ -107,7 +107,7 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
   def runAkkaFutureLoads(executor: Any, executorName: String) {
     if (Benchmark.consoleOutput)
       println("Warming up hotspot for executor " + executorName)
-    val newTest1 = Model.addTest(executor, "Akka Futures w/ " + executorName, runAkkaFutureLoad, true)
+    val newTest1 = Model.addTest(executor, executorName, runAkkaFutureLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // we only warm up once
       gui.addValue(MeanResult(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
@@ -116,13 +116,13 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
     val results = for (
       i <- 0 until Benchmark.numRuns;
-      val result = Model.addTest(executor, "Akka Futures w/ " + executorName, runAkkaFutureLoad, false)
-    ) yield TestResult(newTest1.test, "Akka Futures w/ " + executorName, result.millis, result)
+      val result = Model.addTest(executor, executorName, runAkkaFutureLoad, false)
+    ) yield TestResult(newTest1.test, executorName, result.millis, result)
     val millisMean: Long = arithmeticMean(results.map(_.millis): _*).asInstanceOf[Long]
     val stdDev: Long = popStdDev(results.map(_.millis): _*).asInstanceOf[Long]
     // std deviation is +/- so subtract from mean and double it to show uncertainty range
     // midpoint of uncertainty is therefore the mean
-    gui.addValue(MeanResult(runAkkaFutureLoad, "Akka Futures w/ " + executorName, stdDev * 2L, millisMean - stdDev), false)
+    gui.addValue(MeanResult(runAkkaFutureLoad, executorName, stdDev * 2L, millisMean - stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
@@ -151,23 +151,22 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
     // coming in Scala 2.10 according to Aleksandar Prokopec:
     //scala.collection.parallel.mutable.ParArray(1, 2, 3).tasksupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(2))
 
-    val msg = "Scala parallel collections using %d processors".format(nProcessors)
     if (Benchmark.consoleOutput)
-      println("Warming up hotspot for " + msg)
-    val newTest1 = Model.addTest(nProcessors, msg, runParallelLoad, true)
+      println("Warming up hotspot for " + executorName)
+    val newTest1 = Model.addTest(nProcessors, executorName, runParallelLoad, true)
     if (Benchmark.showWarmUpTimes) {
       val test1StdDev = 0 // // we only warm up once
       gui.addValue(MeanResult(newTest1.test, newTest1.testName, newTest1.millis, test1StdDev), true)
     }
     val results = for (
       i <- 0 until Benchmark.numRuns;
-      val result = Model.addTest(nProcessors, msg, runParallelLoad, false)
-    ) yield TestResult(newTest1.test, msg, result.millis, result)
+      val result = Model.addTest(nProcessors, executorName, runParallelLoad, false)
+    ) yield TestResult(newTest1.test, executorName, result.millis, result)
     val millisMean: Long = arithmeticMean(results.map(_.millis): _*).asInstanceOf[Long]
     val stdDev: Long = popStdDev(results.map(_.millis): _*).asInstanceOf[Long]
     // std deviation is +/- so subtract from mean and double it to show uncertainty range
     // midpoint of uncertainty is therefore the mean
-    gui.addValue(MeanResult(newTest1.test, msg, stdDev * 2L, millisMean - stdDev), false)
+    gui.addValue(MeanResult(newTest1.test, executorName, stdDev * 2L, millisMean - stdDev), false)
     if (Benchmark.consoleOutput)
       println("\n---------------------------------------------------\n")
   }
