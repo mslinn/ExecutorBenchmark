@@ -44,7 +44,7 @@ object DefaultLoads {
 
 
   /** Simulate an IO-bound task (web spider) */
-  def ioBound(): Any = { simulateSpider(5, 30, fetchCount) }
+  def ioBound(): Any = simulateSpider(5, 30, fetchCount)
 
   /** @param minDelay minimum time (ms) to sleep per invocation
     * @param maxDelay maximum time (ms) to sleep per invocation

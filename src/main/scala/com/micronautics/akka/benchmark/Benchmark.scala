@@ -190,7 +190,6 @@ object Benchmark {
   var numRuns: Int = 10
   var showWarmUpTimes: Boolean = false
 
-  def apply(load: () => Any = DefaultLoads.cpuIntensive, showResult: Boolean = false) = {
+  def apply(load: () => Any = DefaultLoads.cpuIntensive, showResult: Boolean = false) =
     new Benchmark(load, showResult)
-  }
 }
