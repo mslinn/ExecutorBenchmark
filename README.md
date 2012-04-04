@@ -1,5 +1,7 @@
 Executor Benchmark
-===============================================
+==================
+
+An article will be published in InfoQ Magazine April 2012 that will fully explain this project.
 
 Mike Slinn
 
