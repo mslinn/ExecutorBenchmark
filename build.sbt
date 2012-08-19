@@ -1,7 +1,7 @@
 // see https://github.com/sbt/sbt-assembly
 import AssemblyKeys._ // put this at the top of the file
 
-organization := "Micronautics Research"
+organization := "com.micronautics"
 
 name := "executorBenchmark"
 
@@ -14,6 +14,10 @@ scalaVersion in update := "2.9.1"
 autoCompilerPlugins := true
 
 javaOptions in run += "-Xbatch -server -Xmx1G -Xms1G -XX:PermSize=64m -XX:MaxPermSize=64m"
+
+javacOptions ++= Seq("-Xlint:deprecation", "-Xlint:unchecked")
+
+scalacOptions ++= Seq("-deprecation", "-unchecked", "-encoding", "utf8")
 
 resolvers ++= Seq(
   "Akka Snapshots"           at "http://akka.io/snapshots",
@@ -35,16 +39,14 @@ libraryDependencies ++= Seq(
   "org.scala-tools"               %  "scala-stm_2.9.1"      % "0.5"       withSources(),
   "org.scala-tools.time"          %  "time_2.9.1"           % "0.5"       ,
   "org.scala-lang"                %  "scala-swing"          % "2.9.1-1"   withSources(),
-  "org.clapper"                   %% "grizzled-scala"       % "1.0.12"    withSources(),
+  "org.clapper"                   %% "grizzled-scala"       % "1.0.13"    withSources(),
   "org.jfree"                     %  "jfreechart"           % "1.0.14"    withSources()
 )
 
 seq(assemblySettings: _*)
-
 
 logLevel := Level.Error
 
 // Only show warnings and errors on the screen for compilations.
 // This applies to both test:compile and compile and is Info by default
 logLevel in compile := Level.Warn
-
