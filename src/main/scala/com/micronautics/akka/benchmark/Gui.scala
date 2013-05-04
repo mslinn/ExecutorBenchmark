@@ -83,7 +83,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
     } catch {
-      case ex => println("Error setting native LAF: " + ex)
+      case ex:Throwable => println("Error setting native LAF: " + ex)
     }
 
     contents = new BoxPanel(Orientation.Vertical) {
@@ -171,7 +171,7 @@ class Gui (benchmark: Benchmark) extends SimpleSwingApplication with Persistable
     val gap = 25
     background = bgColor
     val buttonRun = new Button("Start")
-    buttonRun.size = new Dimension(itemHeight, itemHeight)
+    // not needed ? buttonRun.size = new Dimension(itemHeight, itemHeight)
     val checkboxShowWarmup = new CheckBox("Show warm-up times") {
       selected = Benchmark.showWarmUpTimes
       border = new EmptyBorder(new Insets(0, 0, 0, gap))

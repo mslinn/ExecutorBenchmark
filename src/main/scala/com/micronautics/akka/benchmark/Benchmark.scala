@@ -17,15 +17,16 @@ package com.micronautics.akka.benchmark
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-import akka.dispatch.{ Await, ExecutionContext, Future }
+import scala.concurrent.{ Await, ExecutionContext, Future }
 import akka.actor.ActorSystem
-import akka.util.Duration
+import scala.concurrent.duration.Duration
 import java.util.concurrent.{ ExecutorService, Executor }
 import com.micronautics.akka.DefaultLoads
 import Model.ecNameMap
 import collection.parallel.ForkJoinTasks
 import Numeric._
 import grizzled.math.stats.{ arithmeticMean, popStdDev, populationVariance }
+import scala.collection.parallel.immutable.ParSeq
 
 /**
   * Exercises the ExecutorBenchmark loads
@@ -37,6 +38,7 @@ import grizzled.math.stats.{ arithmeticMean, popStdDev, populationVariance }
 class Benchmark(val load: () => Any, val showResult: Boolean) {
   private val gui = new Gui(this)
   private implicit var dispatcher: ExecutionContext = null
+  private var forkJoinTaskSupport : scala.collection.parallel.ForkJoinTaskSupport = _
 
   /** Swing view */
   def showGui { gui.startup(null) }
@@ -116,7 +118,7 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
       println("\nRunning " + Benchmark.numRuns + " timed loads on " + executorName)
     val results = for (
       i <- 0 until Benchmark.numRuns;
-      val result = Model.addTest(executor, executorName, runAkkaFutureLoad, false)
+      result = Model.addTest(executor, executorName, runAkkaFutureLoad, false)
     ) yield TestResult(newTest1.test, executorName, result.millis, result)
     val millisMean: Long = arithmeticMean(results.map(_.millis): _*).asInstanceOf[Long]
     val stdDev: Long = popStdDev(results.map(_.millis): _*).asInstanceOf[Long]
@@ -134,7 +136,10 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
   def runParallelLoad: TimedResult[Seq[Any]] = {
     System.gc(); System.gc(); System.gc()
     val timedResult = time {
-      ((1 to Benchmark.numInterations).par.map { x => load() })
+      val array = (1 to Benchmark.numInterations).par
+      // {@see http://stackoverflow.com/questions/5424496/scala-parallel-collections-degree-of-parallelism/5425354#5425354}
+      array.tasksupport = forkJoinTaskSupport
+      (array.par.map { x => load() })
     }("Parallel collection elapsed time").asInstanceOf[TimedResult[Seq[Any]]]
     if (Benchmark.consoleOutput && showResult)
       println("Result in " + timedResult.millis + " using Scala parallel collections: " + timedResult.results)
@@ -147,7 +152,8 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
     * should be invoked at least 10 times, perhaps 100 times.
     */
   def runParallelLoads(nProcessors: Int, executorName: String) {
-    ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
+    //ForkJoinTasks.defaultForkJoinPool.setParallelism(nProcessors)
+    forkJoinTaskSupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(nProcessors))
     // coming in Scala 2.10 according to Aleksandar Prokopec:
     //scala.collection.parallel.mutable.ParArray(1, 2, 3).tasksupport = new scala.collection.parallel.ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(2))
 
@@ -160,7 +166,7 @@ class Benchmark(val load: () => Any, val showResult: Boolean) {
     }
     val results = for (
       i <- 0 until Benchmark.numRuns;
-      val result = Model.addTest(nProcessors, executorName, runParallelLoad, false)
+      result = Model.addTest(nProcessors, executorName, runParallelLoad, false)
     ) yield TestResult(newTest1.test, executorName, result.millis, result)
     val millisMean: Long = arithmeticMean(results.map(_.millis): _*).asInstanceOf[Long]
     val stdDev: Long = popStdDev(results.map(_.millis): _*).asInstanceOf[Long]
