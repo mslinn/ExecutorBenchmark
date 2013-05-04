@@ -7,9 +7,9 @@ name := "executorBenchmark"
 
 version := "0.1"
 
-scalaVersion := "2.9.1-1"
+scalaVersion := "2.9.3"
 
-scalaVersion in update := "2.9.1"
+scalaVersion in update := "2.9.3"
 
 autoCompilerPlugins := true
 
@@ -36,10 +36,10 @@ libraryDependencies ++= Seq(
   "com.github.scala-incubator.io" %  "scala-io-core_2.9.1"  % "0.3.0"     withSources(),
   "com.github.scala-incubator.io" %  "scala-io-file_2.9.1"  % "0.3.0"     withSources(),
   "org.apache.httpcomponents"     %  "httpclient"           % "4.1.2"     withSources(),
-  "org.scala-tools"               %  "scala-stm_2.9.1"      % "0.5"       withSources(),
+  "org.scala-stm"                 %% "scala-stm"            % "0.7"       withSources(),
   "org.scala-tools.time"          %  "time_2.9.1"           % "0.5"       ,
   "org.scala-lang"                %  "scala-swing"          % "2.9.1-1"   withSources(),
-  "org.clapper"                   %% "grizzled-scala"       % "1.0.13"    withSources(),
+  "org.clapper"                   %  "grizzled-scala_2.9.2" % "1.0.13"    withSources(),
   "org.jfree"                     %  "jfreechart"           % "1.0.14"    withSources()
 )
 
