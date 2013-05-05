@@ -7,9 +7,9 @@ name := "executorBenchmark"
 
 version := "0.1"
 
-scalaVersion := "2.9.3"
+scalaVersion := "2.10.1"
 
-scalaVersion in update := "2.9.3"
+scalaVersion in update := "2.10.1"
 
 autoCompilerPlugins := true
 
@@ -23,8 +23,8 @@ resolvers ++= Seq(
   "Akka Snapshots"           at "http://akka.io/snapshots",
   "Typesafe Snapshots"       at "http://repo.typesafe.com/typesafe/snapshots",
   "Typesafe Releases"        at "http://repo.typesafe.com/typesafe/releases",
-  "Scala-Tools Snapshots"    at "http://scala-tools.org/repo-snapshots",
-  "Scala Tools Releases"     at "http://scala-tools.org/repo-releases",
+  "Scala-Tools Snapshots"    at "https://oss.sonatype.org/content/repositories/snapshots/",
+  "Scala Tools Releases"     at "https://oss.sonatype.org/content/groups/scala-tools/",
   "Sonatype Nexus Releases"  at "https://oss.sonatype.org/content/repositories/releases",
   "Sonatype Legacy Releases" at "https://oss.sonatype.org/content/repositories/releases",
   "Sonatype staging"         at "https://oss.sonatype.org/content/repositories/staging",
@@ -32,15 +32,15 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.akka"             %  "akka-actor"           % "2.0"       withSources(),
-  "com.github.scala-incubator.io" %  "scala-io-core_2.9.1"  % "0.3.0"     withSources(),
-  "com.github.scala-incubator.io" %  "scala-io-file_2.9.1"  % "0.3.0"     withSources(),
-  "org.apache.httpcomponents"     %  "httpclient"           % "4.1.2"     withSources(),
-  "org.scala-stm"                 %% "scala-stm"            % "0.7"       withSources(),
-  "org.scala-tools.time"          %  "time_2.9.1"           % "0.5"       ,
-  "org.scala-lang"                %  "scala-swing"          % "2.9.1-1"   withSources(),
-  "org.clapper"                   %  "grizzled-scala_2.9.2" % "1.0.13"    withSources(),
-  "org.jfree"                     %  "jfreechart"           % "1.0.14"    withSources()
+  "com.typesafe.akka"             %%  "akka-actor"           % "2.1.2"     withSources(),
+  "com.github.scala-incubator.io" %% "scala-io-core"         % "0.4.2"     withSources(),
+  "com.github.scala-incubator.io" %% "scala-io-file"         % "0.4.2"     withSources(),
+  "org.apache.httpcomponents"     %  "httpclient"            % "4.1.3"     withSources(),
+  "org.scala-stm"                 %% "scala-stm"             % "0.7"       withSources(),
+  "org.scalaj"                    %  "scalaj-time_2.10.0-M7" % "0.6" withSources(),
+  "org.scala-lang"                %  "scala-swing"           % "2.10.1"   withSources(),
+  "org.clapper"                   %%  "grizzled-scala"       % "1.1.3"    withSources(),
+  "org.jfree"                     %  "jfreechart"            % "1.0.14"    withSources()
 )
 
 seq(assemblySettings: _*)
