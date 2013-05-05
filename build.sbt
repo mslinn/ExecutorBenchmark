@@ -1,5 +1,5 @@
 // see https://github.com/sbt/sbt-assembly
-import AssemblyKeys._ // put this at the top of the file
+//import AssemblyKeys._ // put this at the top of the file
 
 organization := "com.micronautics"
 
@@ -9,7 +9,7 @@ version := "0.1"
 
 scalaVersion := "2.10.1"
 
-scalaVersion in update := "2.10.1"
+scalaVersion in update := "2.10"
 
 autoCompilerPlugins := true
 
@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
   "org.jfree"                     %  "jfreechart"            % "1.0.14"    withSources()
 )
 
-seq(assemblySettings: _*)
+//seq(assemblySettings: _*)
 
 logLevel := Level.Error
 
