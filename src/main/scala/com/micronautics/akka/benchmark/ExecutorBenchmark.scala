@@ -17,7 +17,7 @@ package com.micronautics.akka.benchmark
    See the License for the specific language governing permissions and
    limitations under the License. */
 
-import akka.jsr166y.ForkJoinPool
+import scala.concurrent.forkjoin.ForkJoinPool
 import java.util.concurrent.Executors
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
